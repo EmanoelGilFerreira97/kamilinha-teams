@@ -21,11 +21,14 @@ function GuardaDeRota() {
 
     SplashScreen.hideAsync();
 
-    const naTelaDeLogin = segmentos[0] === 'login';
+    // /auth e o retorno do OAuth. Fica fora do guarda para nao piscar a tela de
+    // login no intervalo entre o deep link chegar e a sessao ser gravada; quem
+    // tira o usuario de la e o proprio Redirect da rota.
+    const emRotaPublica = segmentos[0] === 'login' || segmentos[0] === 'auth';
 
-    if (!sessao && !naTelaDeLogin) {
+    if (!sessao && !emRotaPublica) {
       router.replace('/login');
-    } else if (sessao && naTelaDeLogin) {
+    } else if (sessao && segmentos[0] === 'login') {
       router.replace('/');
     }
   }, [sessao, carregando, segmentos, router]);
