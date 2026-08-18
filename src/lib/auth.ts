@@ -8,8 +8,15 @@ import { supabase } from './supabase';
 // Fecha a aba de autenticacao que sobra quando o app volta do navegador.
 WebBrowser.maybeCompleteAuthSession();
 
-// Deriva do `scheme` em app.json: kamilinhateams://
-export const redirectTo = makeRedirectUri();
+// `native` tem precedencia sobre todas as outras opcoes. Sem ele, um
+// development build carregado pelo Metro devolveria exp://127.0.0.1:8081/--/,
+// que nao consta na lista de redirects autorizados do Supabase -- o login
+// autentica no Google e depois nao encontra o caminho de volta.
+export const redirectTo = makeRedirectUri({ native: 'kamilinhateams://auth' });
+
+if (__DEV__) {
+  console.log('[auth] redirectTo =', redirectTo);
+}
 
 /**
  * Monta a sessao a partir da URL que o navegador devolveu.
