@@ -24,6 +24,21 @@ O código já sai pronto para os dois.
 - **Sorteio só por força**, sem posição. Dá para derivar da nota de Levantada
   depois, sem migração.
 - Package Android: `com.emanoelgilferreira.kamilinhateams` (permanente).
+- **Código de convite de 6 caracteres**, no alfabeto sem I, L, O, 0 e 1: o
+  código é ditado em quadra e transcrito no celular do outro. São 31⁶ ≈ 887
+  milhões de combinações.
+- **Só se entra em turma por código.** `membros` não tem policy de INSERT.
+- **`perfis` espelha `auth.users`.** O cliente não lê `auth.users`, e o
+  PostgREST só monta join sobre chave estrangeira que aponte para `public`.
+- **Escrever em `grupos` e `membros` passa por função `security definer`.**
+  Criar, entrar e sair são RPC; as tabelas só carregam policy de leitura. É o
+  que garante que toda escrita atravesse uma regra escrita uma vez só.
+- **Migrações versionadas em `supabase/migrations/`, aplicadas à mão** no SQL
+  Editor do painel: não há Supabase CLI no ambiente. Ver `supabase/README.md`.
+- **Texto que a pessoa lê leva acento; identificador e comentário, não.** Isso
+  inclui as mensagens de `raise exception` das funções: elas sobem pelo
+  PostgREST e o cliente mostra `error.message` como está, então são copy de
+  produto, não log.
 
 ## O anonimato — não afrouxar sem pensar
 
@@ -50,8 +65,11 @@ anonimato. O objetivo é inviabilizar a desanonimização casual.
 
 - **00 — Ambiente.** Concluída.
 - **01 — Login Google.** Concluída. OAuth por navegador via Supabase.
-- **02 — Turmas e perfis.** Esquema `grupos` / `membros` / perfis, RLS, código
-  de convite, lista da turma.
+- **02 — Turmas e perfis.** Concluída, menos rodar
+  `20260818180000_mensagens_acentuadas.sql` no painel. Esquema `perfis` /
+  `grupos` / `membros`, RLS, código de convite, lista da turma e saída da turma.
+  Fluxo testado no aparelho, e a RLS testada de fora com a anon key: leitura,
+  contagem por agregado, escrita direta e execução de função, todas barradas.
 - **03 — Notas e anonimato.** O esquema acima. Fase mais sensível do projeto.
 - **04 — Sorteio.** Snake draft pelo overall, embaralhando empates para os times
   variarem a cada rodada. Roda no aparelho, sem custo de servidor.
@@ -74,6 +92,55 @@ anonimato. O objetivo é inviabilizar a desanonimização casual.
 - **EAS respeita o `.gitignore`**, então `.env.local` não sobe. As variáveis
   `EXPO_PUBLIC_` estão duplicadas nos perfis do `eas.json`. Trocar de projeto
   Supabase exige mudar nos dois lugares.
+
+- **Policy que consulta a própria tabela entra em recursão infinita.** A leitura
+  de `membros` precisa saber se você é membro, o que exigiria ler `membros`. Por
+  isso a checagem vive em `e_membro()`, `security definer`, que roda por fora da
+  RLS e corta o ciclo. Toda policy nova que dependa de pertencimento passa por
+  ela.
+- **`security definer` sem `set search_path = ''` é buraco de segurança**, e o
+  Advisors do painel acusa. A função roda como dono do banco; sem o search_path
+  fixo, um schema no caminho de busca pode sequestrar a resolução de nome.
+- **Delete que não casa com nenhuma linha é sucesso para o PostgREST.** Uma
+  policy que barrasse o dono de sair da turma não geraria erro nenhum — a tela
+  diria que saiu. Por isso sair da turma é RPC, que recusa com mensagem.
+- **`.returns<T>()` do supabase-js está deprecado** em favor de
+  `.overrideTypes<T, { merge: false }>()`. E função que devolve *uma* linha
+  precisa de `.maybeSingle()` antes: o PostgREST responde com o objeto direto, e
+  sem isso o TypeScript acusa conversão de lista para objeto.
+- **Os tipos de rota só existem depois que o dev server roda.**
+  `.expo/types/router.d.ts` é gerado pelo `npx expo start` e está no
+  `.gitignore`. Em árvore recém-clonada, `npx tsc --noEmit` acusa rota
+  inexistente até subir o servidor uma vez.
+- **`useLocalSearchParams` com a string da rota devolve `string | string[]`**,
+  porque o codegen não distingue `[id]` de `[...id]`. Para segmento simples, o
+  formato de params — `useLocalSearchParams<{ id: string }>()` — é o que
+  descreve a rota de verdade.
+- **Módulo nativo novo exige novo development build.** O APK instalado só tem os
+  módulos que existiam quando ele foi gerado. Por isso o convite usa o `Share`
+  do React Native, que é core, em vez de `expo-clipboard`: a fase 02 inteira
+  roda no build que já está no celular.
+
+- **Privilégio de execução de função vem de duas fontes, e revogar uma não
+  basta.** O Postgres concede `EXECUTE` a `PUBLIC` em toda função nova; o
+  Supabase concede a `anon` e `authenticated` por `alter default privileges`.
+  Então `revoke ... from anon` deixa passar o que vem de `PUBLIC`, e
+  `revoke ... from public` deixa passar o grant explícito. Foi assim que
+  `gerar_codigo_de_convite` respondeu a um `curl` com a anon key, mesmo com o
+  revoke escrito. O idioma certo é derrubar as duas e conceder depois:
+
+  ```sql
+  revoke all on function public.f() from public, anon, authenticated;
+  grant execute on function public.f() to authenticated;
+  ```
+
+  **Isso vale dobrado na fase 03.** É o mesmo `revoke` que vai trancar as
+  funções de agregado das notas, e lá a falha silenciosa não é um incômodo — é o
+  modelo inteiro. Depois de escrever qualquer `grant`, testar de fora com a anon
+  key antes de acreditar.
+- **A anon key tem grant de INSERT nas tabelas**, por padrão do Supabase. O que
+  barra a escrita anônima é só a RLS, que devolve `42501`. Não é margem de
+  segurança sobrando: é a RLS sendo, literalmente, a única fronteira.
 
 ## Ambiente
 
