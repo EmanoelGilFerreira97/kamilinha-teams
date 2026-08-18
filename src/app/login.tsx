@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
+import { Botao } from '@/components/botao';
 import { Marca, Spacing } from '@/constants/theme';
 import { entrarComGoogle } from '@/lib/auth';
+import { mensagemDeErro } from '@/lib/erros';
 
 export default function Login() {
   const [entrando, setEntrando] = useState(false);
@@ -15,7 +17,7 @@ export default function Login() {
       await entrarComGoogle();
       // Nao navegamos daqui: o guarda de rota reage a sessao nova.
     } catch (e) {
-      setErro(e instanceof Error ? e.message : 'Nao foi possivel entrar. Tente de novo.');
+      setErro(mensagemDeErro(e, 'Não foi possível entrar. Tente de novo.'));
     } finally {
       setEntrando(false);
     }
@@ -29,22 +31,11 @@ export default function Login() {
       </View>
 
       <View style={estilos.rodape}>
-        <Pressable
-          accessibilityRole="button"
-          disabled={entrando}
-          onPress={aoTocarEntrar}
-          style={({ pressed }) => [
-            estilos.botao,
-            pressed && estilos.botaoPressionado,
-            entrando && estilos.botaoDesativado,
-          ]}>
-          {entrando ? (
-            <ActivityIndicator color={Marca.quadra} />
-          ) : (
-            <Text style={estilos.textoBotao}>Entrar com Google</Text>
-          )}
-        </Pressable>
-
+        <Botao
+          titulo="Entrar com Google"
+          aoTocar={() => void aoTocarEntrar()}
+          carregando={entrando}
+        />
         {erro ? <Text style={estilos.erro}>{erro}</Text> : null}
       </View>
     </View>
@@ -76,25 +67,6 @@ const estilos = StyleSheet.create({
   },
   rodape: {
     gap: Spacing.three,
-  },
-  botao: {
-    backgroundColor: Marca.linha,
-    borderRadius: 6,
-    paddingVertical: Spacing.four,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 56,
-  },
-  botaoPressionado: {
-    opacity: 0.85,
-  },
-  botaoDesativado: {
-    opacity: 0.6,
-  },
-  textoBotao: {
-    color: Marca.quadra,
-    fontSize: 16,
-    fontWeight: '700',
   },
   erro: {
     color: Marca.ataqueClaro,

@@ -56,7 +56,7 @@ export async function entrarComGoogle(): Promise<Session | null> {
     },
   });
   if (error) throw error;
-  if (!data?.url) throw new Error('O Supabase nao devolveu a URL de login do Google.');
+  if (!data?.url) throw new Error('O Supabase não devolveu a URL de login do Google.');
 
   const resultado = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
   if (resultado.type !== 'success') return null;

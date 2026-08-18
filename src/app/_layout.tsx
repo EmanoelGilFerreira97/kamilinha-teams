@@ -3,6 +3,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
 
+import { Marca } from '@/constants/theme';
 import { AuthProvider, useAuth } from '@/contexts/auth';
 
 SplashScreen.preventAutoHideAsync();
@@ -33,7 +34,21 @@ function GuardaDeRota() {
     }
   }, [sessao, carregando, segmentos, router]);
 
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return (
+    <Stack
+      screenOptions={{
+        // As telas desenham o proprio topo; as internas ligam o cabecalho de
+        // volta com <Stack.Screen options={{ headerShown: true }} />, e a cor
+        // fica aqui para nao repetir a paleta em cada rota.
+        headerShown: false,
+        headerStyle: { backgroundColor: Marca.quadra },
+        headerTintColor: Marca.linha,
+        headerTitleStyle: { fontWeight: '700' },
+        // Sem isto o fundo branco do navegador pisca entre uma tela e outra.
+        contentStyle: { backgroundColor: Marca.quadra },
+      }}
+    />
+  );
 }
 
 export default function RootLayout() {
