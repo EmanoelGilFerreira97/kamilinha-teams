@@ -1,11 +1,21 @@
 import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, Share, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Pressable,
+  Share,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
 import { Botao } from '@/components/botao';
 import { Marca, Spacing } from '@/constants/theme';
 import { useAuth } from '@/contexts/auth';
 import { mensagemDeErro } from '@/lib/erros';
+import { listarNotasDaTurma, type NotaDaTurma } from '@/lib/notas';
 import {
   buscarTurma,
   listarMembros,
@@ -13,6 +23,13 @@ import {
   type MembroDaTurma,
   type Turma,
 } from '@/lib/turmas';
+
+/** Uma linha da lista: o membro, com a nota agregada quando ela existe. */
+type LinhaDaQuadra = {
+  usuario_id: string;
+  nome: string;
+  nota: NotaDaTurma | null;
+};
 
 export default function DetalheDaTurma() {
   // O generic com a string da rota devolveria string | string[], porque o
@@ -23,7 +40,7 @@ export default function DetalheDaTurma() {
   const router = useRouter();
 
   const [turma, setTurma] = useState<Turma | null>(null);
-  const [membros, setMembros] = useState<MembroDaTurma[]>([]);
+  const [linhas, setLinhas] = useState<LinhaDaQuadra[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
   const [saindo, setSaindo] = useState(false);
@@ -34,11 +51,12 @@ export default function DetalheDaTurma() {
   const carregar = useCallback(async () => {
     try {
       setErro(null);
-      // As duas buscas sao independentes, e a lista de membros e o conteudo
-      // principal da tela -- esperar uma depois da outra dobraria a espera.
-      const [turmaCarregada, membrosCarregados] = await Promise.all([
+      // As tres buscas sao independentes, e a lista e o conteudo principal da
+      // tela -- esperar uma depois da outra triplicaria a espera.
+      const [turmaCarregada, membros, notas] = await Promise.all([
         buscarTurma(id),
         listarMembros(id),
+        listarNotasDaTurma(id),
       ]);
 
       if (turmaCarregada === null) {
@@ -49,7 +67,7 @@ export default function DetalheDaTurma() {
       }
 
       setTurma(turmaCarregada);
-      setMembros(membrosCarregados);
+      setLinhas(montarLinhas(membros, notas));
     } catch (e) {
       setErro(mensagemDeErro(e, 'Não foi possível carregar a turma.'));
     } finally {
@@ -127,8 +145,8 @@ export default function DetalheDaTurma() {
       <View style={estilos.tela}>
         <FlatList
           contentContainerStyle={estilos.lista}
-          data={membros}
-          keyExtractor={(membro) => membro.usuario_id}
+          data={linhas}
+          keyExtractor={(linha) => linha.usuario_id}
           ListHeaderComponent={
             <View style={estilos.blocoDoCodigo}>
               <Text style={estilos.rotuloDoCodigo}>Código de convite</Text>
@@ -136,22 +154,25 @@ export default function DetalheDaTurma() {
                 {turma.codigo}
               </Text>
               <Botao titulo="Convidar" variante="secundario" aoTocar={() => void aoConvidar()} />
-              <Text style={estilos.tituloDaSecao}>
-                Na quadra ({membros.length})
+              <Text style={estilos.tituloDaSecao}>Na quadra ({linhas.length})</Text>
+              <Text style={estilos.explicacao}>
+                Toque em alguém para avaliar. A nota só aparece depois de cinco avaliadores, e
+                ninguém descobre quem deu o quê.
               </Text>
             </View>
           }
           renderItem={({ item }) => (
-            <View style={estilos.membro}>
-              <Text style={estilos.nomeDoMembro} numberOfLines={1}>
-                {item.perfil?.nome ?? 'Jogador'}
-              </Text>
-              {item.usuario_id === turma.dono_id ? (
-                <Text style={estilos.etiqueta}>dono</Text>
-              ) : item.usuario_id === meuId ? (
-                <Text style={estilos.etiqueta}>você</Text>
-              ) : null}
-            </View>
+            <LinhaDeJogador
+              linha={item}
+              souEu={item.usuario_id === meuId}
+              ehDono={item.usuario_id === turma.dono_id}
+              aoTocar={() =>
+                router.push({
+                  pathname: '/turma/[id]/avaliar/[jogador]',
+                  params: { id, jogador: item.usuario_id },
+                })
+              }
+            />
           )}
         />
 
@@ -166,6 +187,59 @@ export default function DetalheDaTurma() {
         )}
       </View>
     </>
+  );
+}
+
+/**
+ * Junta a lista de membros com o agregado.
+ *
+ * O agregado nao traz quem esta perguntando -- a propria nota nao sai do banco.
+ * Por isso a lista de membros continua sendo a fonte de quem esta na turma, e a
+ * nota entra por cima quando existe.
+ */
+function montarLinhas(membros: MembroDaTurma[], notas: NotaDaTurma[]): LinhaDaQuadra[] {
+  const porJogador = new Map(notas.map((nota) => [nota.jogador_id, nota]));
+
+  return membros.map((membro) => ({
+    usuario_id: membro.usuario_id,
+    nome: membro.perfil?.nome ?? 'Jogador',
+    nota: porJogador.get(membro.usuario_id) ?? null,
+  }));
+}
+
+function LinhaDeJogador({
+  linha,
+  souEu,
+  ehDono,
+  aoTocar,
+}: {
+  linha: LinhaDaQuadra;
+  souEu: boolean;
+  ehDono: boolean;
+  aoTocar: () => void;
+}) {
+  const etiqueta = souEu ? 'você' : ehDono ? 'dono' : null;
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      // Ninguem avalia a si mesmo, entao a propria linha nao leva a lugar nenhum.
+      disabled={souEu}
+      onPress={aoTocar}
+      style={({ pressed }) => [estilos.jogador, pressed && estilos.pressionado]}>
+      <View style={estilos.identificacao}>
+        <Text style={estilos.nomeDoJogador} numberOfLines={1}>
+          {linha.nome}
+        </Text>
+        {etiqueta ? <Text style={estilos.etiqueta}>{etiqueta}</Text> : null}
+      </View>
+
+      {souEu ? null : (
+        <Text style={[estilos.overall, linha.nota?.confiavel ? null : estilos.overallSemNota]}>
+          {linha.nota?.confiavel ? linha.nota.overall : '–'}
+        </Text>
+      )}
+    </Pressable>
   );
 }
 
@@ -210,7 +284,12 @@ const estilos = StyleSheet.create({
     fontWeight: '700',
     paddingTop: Spacing.four,
   },
-  membro: {
+  explicacao: {
+    color: Marca.ataqueClaro,
+    fontSize: 13,
+    lineHeight: 19,
+  },
+  jogador: {
     alignItems: 'center',
     backgroundColor: Marca.quadraClara,
     borderRadius: 8,
@@ -220,7 +299,13 @@ const estilos = StyleSheet.create({
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.three,
   },
-  nomeDoMembro: {
+  identificacao: {
+    alignItems: 'baseline',
+    flexDirection: 'row',
+    flexShrink: 1,
+    gap: Spacing.two,
+  },
+  nomeDoJogador: {
     color: Marca.linha,
     flexShrink: 1,
     fontSize: 16,
@@ -231,6 +316,18 @@ const estilos = StyleSheet.create({
     fontSize: 13,
     fontWeight: '700',
     textTransform: 'uppercase',
+  },
+  overall: {
+    color: Marca.linha,
+    fontSize: 26,
+    fontWeight: '800',
+    fontVariant: ['tabular-nums'],
+  },
+  overallSemNota: {
+    color: Marca.quadra,
+  },
+  pressionado: {
+    opacity: 0.7,
   },
   botaoSair: {
     marginBottom: Spacing.four,
