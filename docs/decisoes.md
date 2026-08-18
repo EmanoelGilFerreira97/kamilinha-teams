@@ -65,11 +65,10 @@ anonimato. O objetivo é inviabilizar a desanonimização casual.
 
 - **00 — Ambiente.** Concluída.
 - **01 — Login Google.** Concluída. OAuth por navegador via Supabase.
-- **02 — Turmas e perfis.** Concluída, menos rodar
-  `20260818180000_mensagens_acentuadas.sql` no painel. Esquema `perfis` /
-  `grupos` / `membros`, RLS, código de convite, lista da turma e saída da turma.
-  Fluxo testado no aparelho, e a RLS testada de fora com a anon key: leitura,
-  contagem por agregado, escrita direta e execução de função, todas barradas.
+- **02 — Turmas e perfis.** Concluída. Esquema `perfis` / `grupos` / `membros`,
+  RLS, código de convite, lista da turma e saída da turma. Fluxo testado no
+  aparelho, e a RLS testada de fora com a anon key: leitura, contagem por
+  agregado, escrita direta e execução de função, todas barradas.
 - **03 — Notas e anonimato.** O esquema acima. Fase mais sensível do projeto.
 - **04 — Sorteio.** Snake draft pelo overall, embaralhando empates para os times
   variarem a cada rodada. Roda no aparelho, sem custo de servidor.
