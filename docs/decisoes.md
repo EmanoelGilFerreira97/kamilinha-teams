@@ -45,18 +45,53 @@ O código já sai pronto para os dois.
 O modelo inteiro depende de o Postgres recusar a leitura, não de a tela não
 exibir. Qualquer pessoa com a anon key consulta a API REST direto.
 
-1. RLS ligada em `ratings`, com policies apenas de INSERT e UPDATE, ambas
-   restritas a `rater_id = auth.uid()` e a membros do grupo.
-2. **Nenhuma policy de SELECT.** Essa ausência é o anonimato.
-3. Agregados só por função `security definer`, que:
-   - exige **piso de 5 avaliadores** — 5 e não 3 por causa da escala larga:
-     em 0–100 um voto é quase uma impressão digital, e o trio de atributos
+A tabela é `notas`, com `avaliador_id` e `avaliado_id` — e não `ratings` /
+`rater_id` / `rated_id`, como este documento dizia antes de a fase 03 existir.
+Português, como o resto do esquema.
+
+1. RLS ligada em `notas`, e **nenhuma policy**. Nenhuma mesmo: nem de SELECT,
+   nem de INSERT, nem de UPDATE. A tabela fica inalcançável pelo cliente, e as
+   três funções abaixo são a única porta. Confere-se com uma consulta só —
+   `pg_policies` não pode ter uma linha sequer para `notas`.
+2. **`avaliar()`** é a única escrita. Checa que o avaliador é quem está logado,
+   que os dois são membros da turma, e que ninguém se autoavalia.
+3. **`minhas_notas()`** é a única leitura de linha crua, restrita a
+   `avaliador_id = auth.uid()`. Reler o próprio voto não revela voto de mais
+   ninguém, e é o que faz a avaliação ser correção em vez de chute novo a cada
+   rodada.
+4. **`notas_da_turma()`** é o agregado, e:
+   - **exige que quem chama seja membro.** A função roda `security definer`,
+     então precisa fazer ela mesma o que a RLS faria — sem essa linha, qualquer
+     pessoa logada leria o agregado de qualquer turma só passando o id;
+   - exige **piso de 5 avaliadores** — 5 e não 3 por causa da escala larga: em
+     0–100 um voto é quase uma impressão digital, e o trio de atributos
      identifica o avaliador melhor ainda;
    - devolve **média bayesiana** `(5·m + soma) / (5 + n)`, nunca a média crua,
      para o número exibido não ser aritmética reversível dos votos;
-   - **nunca devolve a contagem** de votos, só um booleano `confiavel` —
+   - **abaixo do piso devolve o prior puro (50)**, e não a conta. Número fixo
+     não carrega informação de voto nenhum, e ainda entrega valor usável para o
+     sorteio. A tela mostra `–` nesse caso; o 50 é para o algoritmo;
+   - **nunca devolve a contagem** de votos, só o booleano `confiavel` —
      contagem exata alimenta o ataque por diferença entre dois momentos;
-   - filtra `rated_id <> auth.uid()` para a própria nota não sair do banco.
+   - filtra `avaliado_id <> auth.uid()` para a própria nota não sair do banco.
+
+### Por que nenhuma policy, e não as de INSERT e UPDATE
+
+Este documento pedia policy de INSERT e de UPDATE, e nenhuma de SELECT. Esse
+desenho não fecha, e a tabela 297 do `CREATE POLICY` diz por quê: em
+`insert ... on conflict do update` a policy de **SELECT** é aplicada para checar
+a linha existente, e um `update` comum precisa de um `where` para achar a linha
+— o que exige direito de leitura e faz valer as policies de SELECT junto com as
+de UPDATE.
+
+Sem policy de SELECT, então, a policy de UPDATE nunca dispararia: o update
+casaria com zero linhas. E casar com zero linhas **não dá erro** — é a mesma
+armadilha que fez `sair_da_turma` virar função na fase 02. Ninguém conseguiria
+corrigir uma nota, e a tela diria que corrigiu.
+
+A saída aperta em vez de afrouxar. Zero policy é invariante mais forte que
+"nenhuma de SELECT", e mais fácil de conferir: em vez de ler um predicado, se
+confere uma ausência.
 
 Limite conhecido e aceito: em turma pequena, conluio deliberado quebra o
 anonimato. O objetivo é inviabilizar a desanonimização casual.
@@ -69,7 +104,12 @@ anonimato. O objetivo é inviabilizar a desanonimização casual.
   RLS, código de convite, lista da turma e saída da turma. Fluxo testado no
   aparelho, e a RLS testada de fora com a anon key: leitura, contagem por
   agregado, escrita direta e execução de função, todas barradas.
-- **03 — Notas e anonimato.** O esquema acima. Fase mais sensível do projeto.
+- **03 — Notas e anonimato.** Concluída. `notas` com RLS ligada e nenhuma
+  policy; `avaliar()`, `minhas_notas()` e o agregado com piso de 5 e média
+  bayesiana. Verificado no aparelho com seis jogadores semeados: a escada de
+  notas bateu com a fórmula, e a correção de nota sobreviveu à reabertura. De
+  fora, com a anon key: leitura, contagem por agregado, escrita direta e as
+  quatro funções, todas barradas.
 - **04 — Sorteio.** Snake draft pelo overall, embaralhando empates para os times
   variarem a cada rodada. Roda no aparelho, sem custo de servidor.
 - **05 — Acabamento e publicação.**
@@ -140,6 +180,18 @@ anonimato. O objetivo é inviabilizar a desanonimização casual.
 - **A anon key tem grant de INSERT nas tabelas**, por padrão do Supabase. O que
   barra a escrita anônima é só a RLS, que devolve `42501`. Não é margem de
   segurança sobrando: é a RLS sendo, literalmente, a única fronteira.
+
+- **Policy de UPDATE sem policy de SELECT é policy morta.** Todo `update` vindo
+  do cliente precisa de um `where` para achar a linha, e isso faz valer as
+  policies de SELECT junto com as de UPDATE. Sem nenhuma de SELECT, o update
+  casa com zero linhas — calado, porque zero linhas é sucesso. O mesmo vale para
+  `insert ... on conflict do update`. Ver a seção do anonimato.
+- **Sem os tipos gerados do banco, o postgrest-js chuta o retorno das RPC.** Ele
+  não conhece o esquema, então erra para os dois lados: função que devolve uma
+  linha precisa de `.maybeSingle()` antes do `overrideTypes`, e função que
+  devolve conjunto reclama de "cannot cast single object to array". Enquanto não
+  houver `supabase gen types`, asserção explícita na borda é mais honesta que
+  brigar com a inferência — o contrato de verdade está na migração.
 
 ## Ambiente
 
