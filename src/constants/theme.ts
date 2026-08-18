@@ -26,6 +26,18 @@ export const Colors = {
 
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
+/**
+ * Identidade do app, tirada das cores de uma quadra de volei: azul de quadra,
+ * laranja da zona de ataque, branco de linha demarcatoria.
+ */
+export const Marca = {
+  quadra: '#0B2E45',
+  quadraClara: '#17607E',
+  ataque: '#C25E22',
+  ataqueClaro: '#E58B4C',
+  linha: '#F2F5F7',
+} as const;
+
 export const Fonts = Platform.select({
   ios: {
     /** iOS `UIFontDescriptorSystemDesignDefault` */

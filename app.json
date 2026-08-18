@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "kamilinha-teams",
+    "name": "Kamilinha Teams",
     "slug": "kamilinha-teams",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -11,6 +11,7 @@
       "icon": "./assets/expo.icon"
     },
     "android": {
+      "package": "com.emanoelgilferreira.kamilinhateams",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -37,6 +38,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "0e54822e-3af1-437b-8fff-b00b65796b23"
+      }
+    },
+    "owner": "emanoelgilferreira"
   }
 }
