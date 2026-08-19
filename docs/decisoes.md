@@ -133,9 +133,10 @@ anonimato. O objetivo é inviabilizar a desanonimização casual.
   notas bateu com a fórmula, e a correção de nota sobreviveu à reabertura. De
   fora, com a anon key: leitura, contagem por agregado, escrita direta e as
   quatro funções, todas barradas.
-- **04 — Sorteio.** Código pronto. Falta rodar `20260818210000_sorteio.sql` no
-  painel e testar no aparelho. Snake draft pelo overall, com quem veio hoje
-  escolhido na tela, embaralhando empates para os times variarem a cada rodada.
+- **04 — Sorteio.** Concluída. Snake draft pelo overall rodando no banco, com
+  quem veio hoje escolhido na tela, embaralhando empates para os times variarem
+  a cada rodada. Testado no APK. De fora, com a anon key, as seis funções
+  barradas; e o ACL de `overall_do_grupo` conferido sem `authenticated`.
 - **05 — Acabamento e publicação.**
 
 ## Armadilhas já encontradas
