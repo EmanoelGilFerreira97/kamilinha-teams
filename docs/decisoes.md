@@ -58,6 +58,13 @@ O código já sai pronto para os dois.
   devolvendo nota nem soma de time — soma de time com três companheiros
   conhecidos resolveria o seu número exatamente. Limite aceito, como o do
   conluio.
+- **O sistema de temas do template fica, mesmo sem consumidor.**
+  `themed-text`, `themed-view`, `use-theme`, `use-color-scheme` e os exports
+  `Colors`, `Fonts`, `ThemeColor`, `BottomTabInset` e `MaxContentWidth` do
+  `theme.ts` não têm um único uso desde a fase 01. **Não são para remover:** a
+  passada final de front-end vem depois de as funcionalidades fecharem, e é ali
+  que eles servem — claro/escuro e a escala de tipografia já estão prontos.
+  Até lá o visual das telas é funcional, não final.
 - **Texto que a pessoa lê leva acento; identificador e comentário, não.** Isso
   inclui as mensagens de `raise exception` das funções: elas sobem pelo
   PostgREST e o cliente mostra `error.message` como está, então são copy de
@@ -137,7 +144,11 @@ anonimato. O objetivo é inviabilizar a desanonimização casual.
   quem veio hoje escolhido na tela, embaralhando empates para os times variarem
   a cada rodada. Testado no APK. De fora, com a anon key, as seis funções
   barradas; e o ACL de `overall_do_grupo` conferido sem `authenticated`.
-- **05 — Acabamento e publicação.**
+- **05 — Acabamento e publicação.** Ícone próprio gerado da paleta, README do
+  projeto, limpeza do que sobrou do template. O APK sai pelo perfil `preview` e
+  é distribuído direto no grupo — sem loja, sem política de privacidade, sem
+  revisão.
+- **Depois.** Mais funcionalidades, e só então a versão final do front-end.
 
 ## Armadilhas já encontradas
 
