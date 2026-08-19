@@ -1,5 +1,5 @@
 import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -12,7 +12,8 @@ import {
 } from 'react-native';
 
 import { Botao } from '@/components/botao';
-import { Marca, Spacing } from '@/constants/theme';
+import { Spacing, type Cores } from '@/constants/theme';
+import { useTema } from '@/contexts/tema';
 import { useAuth } from '@/contexts/auth';
 import { mensagemDeErro } from '@/lib/erros';
 import { listarNotasDaTurma, type NotaDaTurma } from '@/lib/notas';
@@ -32,6 +33,8 @@ type LinhaDaQuadra = {
 };
 
 export default function DetalheDaTurma() {
+  const { cores } = useTema();
+  const estilos = useMemo(() => criarEstilos(cores), [cores]);
   // O generic com a string da rota devolveria string | string[], porque o
   // codegen nao distingue [id] de [...id]. Segmento simples e sempre um valor
   // so, entao o formato de params e o que descreve a rota de verdade.
@@ -122,7 +125,7 @@ export default function DetalheDaTurma() {
       <>
         <Stack.Screen options={{ headerShown: true, title: 'Turma' }} />
         <View style={[estilos.tela, estilos.centralizado]}>
-          <ActivityIndicator color={Marca.ataqueClaro} />
+          <ActivityIndicator color={cores.destaque} />
         </View>
       </>
     );
@@ -170,6 +173,7 @@ export default function DetalheDaTurma() {
               linha={item}
               souEu={item.usuario_id === meuId}
               ehDono={item.usuario_id === turma.dono_id}
+              estilos={estilos}
               aoTocar={() =>
                 router.push({
                   pathname: '/turma/[id]/avaliar/[jogador]',
@@ -216,11 +220,13 @@ function LinhaDeJogador({
   souEu,
   ehDono,
   aoTocar,
+  estilos,
 }: {
   linha: LinhaDaQuadra;
   souEu: boolean;
   ehDono: boolean;
   aoTocar: () => void;
+  estilos: ReturnType<typeof criarEstilos>;
 }) {
   const etiqueta = souEu ? 'você' : ehDono ? 'dono' : null;
 
@@ -247,93 +253,95 @@ function LinhaDeJogador({
   );
 }
 
-const estilos = StyleSheet.create({
-  tela: {
-    flex: 1,
-    backgroundColor: Marca.quadra,
-    paddingHorizontal: Spacing.four,
-  },
-  centralizado: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  aviso: {
-    color: Marca.ataqueClaro,
-    fontSize: 15,
-    lineHeight: 22,
-    textAlign: 'center',
-  },
-  lista: {
-    gap: Spacing.two,
-    paddingBottom: Spacing.three,
-  },
-  blocoDoCodigo: {
-    gap: Spacing.two,
-    paddingBottom: Spacing.three,
-    paddingTop: Spacing.four,
-  },
-  rotuloDoCodigo: {
-    color: Marca.ataqueClaro,
-    fontSize: 14,
-  },
-  codigo: {
-    color: Marca.linha,
-    fontSize: 40,
-    fontWeight: '800',
-    letterSpacing: 8,
-  },
-  tituloDaSecao: {
-    color: Marca.linha,
-    fontSize: 18,
-    fontWeight: '700',
-    paddingTop: Spacing.four,
-  },
-  explicacao: {
-    color: Marca.ataqueClaro,
-    fontSize: 13,
-    lineHeight: 19,
-  },
-  jogador: {
-    alignItems: 'center',
-    backgroundColor: Marca.quadraClara,
-    borderRadius: 8,
-    flexDirection: 'row',
-    gap: Spacing.three,
-    justifyContent: 'space-between',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.three,
-  },
-  identificacao: {
-    alignItems: 'baseline',
-    flexDirection: 'row',
-    flexShrink: 1,
-    gap: Spacing.two,
-  },
-  nomeDoJogador: {
-    color: Marca.linha,
-    flexShrink: 1,
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  etiqueta: {
-    color: Marca.ataqueClaro,
-    fontSize: 13,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-  },
-  overall: {
-    color: Marca.linha,
-    fontSize: 26,
-    fontWeight: '800',
-    fontVariant: ['tabular-nums'],
-  },
-  overallSemNota: {
-    color: Marca.quadra,
-  },
-  pressionado: {
-    opacity: 0.7,
-  },
-  botaoSair: {
-    marginBottom: Spacing.four,
-  },
-});
+function criarEstilos(cores: Cores) {
+  return StyleSheet.create({
+    tela: {
+      flex: 1,
+      backgroundColor: cores.fundo,
+      paddingHorizontal: Spacing.four,
+    },
+    centralizado: {
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    aviso: {
+      color: cores.textoFraco,
+      fontSize: 15,
+      lineHeight: 22,
+      textAlign: 'center',
+    },
+    lista: {
+      gap: Spacing.two,
+      paddingBottom: Spacing.three,
+    },
+    blocoDoCodigo: {
+      gap: Spacing.two,
+      paddingBottom: Spacing.three,
+      paddingTop: Spacing.four,
+    },
+    rotuloDoCodigo: {
+      color: cores.textoFraco,
+      fontSize: 14,
+    },
+    codigo: {
+      color: cores.texto,
+      fontSize: 40,
+      fontWeight: '800',
+      letterSpacing: 8,
+    },
+    tituloDaSecao: {
+      color: cores.texto,
+      fontSize: 18,
+      fontWeight: '700',
+      paddingTop: Spacing.four,
+    },
+    explicacao: {
+      color: cores.textoFraco,
+      fontSize: 13,
+      lineHeight: 19,
+    },
+    jogador: {
+      alignItems: 'center',
+      backgroundColor: cores.superficie,
+      borderRadius: 8,
+      flexDirection: 'row',
+      gap: Spacing.three,
+      justifyContent: 'space-between',
+      paddingHorizontal: Spacing.three,
+      paddingVertical: Spacing.three,
+    },
+    identificacao: {
+      alignItems: 'baseline',
+      flexDirection: 'row',
+      flexShrink: 1,
+      gap: Spacing.two,
+    },
+    nomeDoJogador: {
+      color: cores.texto,
+      flexShrink: 1,
+      fontSize: 16,
+      fontWeight: '600',
+    },
+    etiqueta: {
+      color: cores.textoFraco,
+      fontSize: 13,
+      fontWeight: '700',
+      textTransform: 'uppercase',
+    },
+    overall: {
+      color: cores.texto,
+      fontSize: 26,
+      fontWeight: '800',
+      fontVariant: ['tabular-nums'],
+    },
+    overallSemNota: {
+      color: cores.textoFraco,
+    },
+    pressionado: {
+      opacity: 0.7,
+    },
+    botaoSair: {
+      marginBottom: Spacing.four,
+    },
+  });
+}

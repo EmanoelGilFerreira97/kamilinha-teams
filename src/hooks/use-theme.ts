@@ -1,14 +1,11 @@
+import { useTema } from '@/contexts/tema';
+
 /**
- * Learn more about light and dark modes:
- * https://docs.expo.dev/guides/color-schemes/
+ * Atalho para so as cores do tema.
+ *
+ * Existe porque ThemedText e ThemedView so precisam disso, e porque era assim
+ * que o template expunha o tema -- manter a assinatura evita mexer neles.
  */
-
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
 export function useTheme() {
-  const scheme = useColorScheme();
-  const theme = scheme === 'unspecified' ? 'light' : scheme;
-
-  return Colors[theme];
+  return useTema().cores;
 }

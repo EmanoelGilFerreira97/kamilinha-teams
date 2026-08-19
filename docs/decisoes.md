@@ -58,13 +58,25 @@ O código já sai pronto para os dois.
   devolvendo nota nem soma de time — soma de time com três companheiros
   conhecidos resolveria o seu número exatamente. Limite aceito, como o do
   conluio.
-- **O sistema de temas do template fica, mesmo sem consumidor.**
-  `themed-text`, `themed-view`, `use-theme`, `use-color-scheme` e os exports
-  `Colors`, `Fonts`, `ThemeColor`, `BottomTabInset` e `MaxContentWidth` do
-  `theme.ts` não têm um único uso desde a fase 01. **Não são para remover:** a
-  passada final de front-end vem depois de as funcionalidades fecharem, e é ali
-  que eles servem — claro/escuro e a escala de tipografia já estão prontos.
-  Até lá o visual das telas é funcional, não final.
+- **A paleta sai do logo do grupo**, e vem em dois temas que a pessoa escolhe:
+  claro (fundo branco, rosa de destaque) e escuro (fundo vinho, rosa claro). O
+  padrão segue o aparelho, e a escolha manual sobrevive ao fechar o app, em
+  `AsyncStorage`. O botão fica no topo da tela inicial e roda entre
+  `auto` → `claro` → `escuro`.
+- **Os tokens de cor têm nome de papel, não de cor.** `fundo`, `superficie`,
+  `texto`, `textoFraco`, `destaque`, `destaqueForte`, `textoSobreDestaque`,
+  `borda`. "Rosa claro" seria texto em um tema e destaque no outro; `destaque`
+  é destaque nos dois. Foi o que aposentou o vocabulário de quadra —
+  `Marca.quadra` e `Marca.ataque` morreram com o azul e o laranja.
+- **O sistema de temas do template virou a base disso.** `Colors`, `useTheme`,
+  `themed-text` e `themed-view` ficaram quatro fases sem consumidor e foram
+  preservados de propósito; a paleta nova entrou neles em vez de num sistema
+  paralelo.
+- **O ícone é o logo sem o banner do "VÔLEI".** A 48px na gaveta a tipografia
+  vira borrão, e o que sobrevive é a chama com a bola e o "KT". A base das
+  letras e o topo do banner são colados no desenho, então não há corte reto que
+  pegue uma sem a outra — o rodapé é desvanecido, e a sobra dissolve no fundo.
+  `scripts/gerar-icones.js` faz o recorte a partir de `assets/logo.png`.
 - **Texto que a pessoa lê leva acento; identificador e comentário, não.** Isso
   inclui as mensagens de `raise exception` das funções: elas sobem pelo
   PostgREST e o cliente mostra `error.message` como está, então são copy de

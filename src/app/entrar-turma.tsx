@@ -1,14 +1,17 @@
 import { Stack, useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
 
 import { Botao } from '@/components/botao';
 import { Campo } from '@/components/campo';
-import { Marca, Spacing } from '@/constants/theme';
+import { Spacing, type Cores } from '@/constants/theme';
+import { useTema } from '@/contexts/tema';
 import { mensagemDeErro } from '@/lib/erros';
 import { entrarPorCodigo, normalizarCodigo, TAMANHO_DO_CODIGO } from '@/lib/turmas';
 
 export default function EntrarTurma() {
+  const { cores } = useTema();
+  const estilos = useMemo(() => criarEstilos(cores), [cores]);
   const router = useRouter();
   const [codigo, setCodigo] = useState('');
   const [entrando, setEntrando] = useState(false);
@@ -71,40 +74,42 @@ export default function EntrarTurma() {
   );
 }
 
-const estilos = StyleSheet.create({
-  tela: {
-    flex: 1,
-    backgroundColor: Marca.quadra,
-    justifyContent: 'space-between',
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.four,
-  },
-  formulario: {
-    gap: Spacing.two,
-  },
-  rotulo: {
-    color: Marca.linha,
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  campoDoCodigo: {
-    fontSize: 28,
-    fontWeight: '700',
-    letterSpacing: 8,
-    textAlign: 'center',
-  },
-  ajuda: {
-    color: Marca.ataqueClaro,
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  erro: {
-    color: Marca.ataqueClaro,
-    fontSize: 14,
-    fontWeight: '600',
-    marginTop: Spacing.two,
-  },
-  botao: {
-    marginBottom: Spacing.four,
-  },
-});
+function criarEstilos(cores: Cores) {
+  return StyleSheet.create({
+    tela: {
+      flex: 1,
+      backgroundColor: cores.fundo,
+      justifyContent: 'space-between',
+      paddingHorizontal: Spacing.four,
+      paddingVertical: Spacing.four,
+    },
+    formulario: {
+      gap: Spacing.two,
+    },
+    rotulo: {
+      color: cores.texto,
+      fontSize: 15,
+      fontWeight: '600',
+    },
+    campoDoCodigo: {
+      fontSize: 28,
+      fontWeight: '700',
+      letterSpacing: 8,
+      textAlign: 'center',
+    },
+    ajuda: {
+      color: cores.textoFraco,
+      fontSize: 14,
+      lineHeight: 20,
+    },
+    erro: {
+      color: cores.textoFraco,
+      fontSize: 14,
+      fontWeight: '600',
+      marginTop: Spacing.two,
+    },
+    botao: {
+      marginBottom: Spacing.four,
+    },
+  });
+}

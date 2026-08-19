@@ -3,7 +3,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Botao } from '@/components/botao';
-import { Marca, Spacing } from '@/constants/theme';
+import { Spacing, type Cores } from '@/constants/theme';
+import { useTema } from '@/contexts/tema';
 import { mensagemDeErro } from '@/lib/erros';
 import {
   quantidadeDeTimes,
@@ -14,6 +15,8 @@ import {
 import { listarMembros, type MembroDaTurma } from '@/lib/turmas';
 
 export default function Sortear() {
+  const { cores } = useTema();
+  const estilos = useMemo(() => criarEstilos(cores), [cores]);
   const { id } = useLocalSearchParams<{ id: string }>();
 
   const [membros, setMembros] = useState<MembroDaTurma[]>([]);
@@ -84,7 +87,7 @@ export default function Sortear() {
       <>
         <Stack.Screen options={{ headerShown: true, title: 'Sortear' }} />
         <View style={[estilos.tela, estilos.centralizado]}>
-          <ActivityIndicator color={Marca.ataqueClaro} />
+          <ActivityIndicator color={cores.destaque} />
         </View>
       </>
     );
@@ -99,7 +102,7 @@ export default function Sortear() {
             contentContainerStyle={estilos.lista}
             data={times}
             keyExtractor={(time) => String(time.numero)}
-            renderItem={({ item }) => <CartaDoTime time={item} />}
+            renderItem={({ item }) => <CartaDoTime time={item} estilos={estilos} />}
           />
           <View style={estilos.rodape}>
             {erro ? <Text style={estilos.erro}>{erro}</Text> : null}
@@ -128,6 +131,7 @@ export default function Sortear() {
               nome={item.perfil?.nome ?? 'Jogador'}
               marcado={presentes.has(item.usuario_id)}
               aoTocar={() => alternar(item.usuario_id)}
+              estilos={estilos}
             />
           )}
         />
@@ -155,10 +159,12 @@ function LinhaDePresenca({
   nome,
   marcado,
   aoTocar,
+  estilos,
 }: {
   nome: string;
   marcado: boolean;
   aoTocar: () => void;
+  estilos: ReturnType<typeof criarEstilos>;
 }) {
   return (
     <Pressable
@@ -176,7 +182,13 @@ function LinhaDePresenca({
   );
 }
 
-function CartaDoTime({ time }: { time: TimeSorteado }) {
+function CartaDoTime({
+  time,
+  estilos,
+}: {
+  time: TimeSorteado;
+  estilos: ReturnType<typeof criarEstilos>;
+}) {
   return (
     <View style={estilos.carta}>
       <Text style={estilos.tituloDoTime}>
@@ -195,107 +207,109 @@ function CartaDoTime({ time }: { time: TimeSorteado }) {
   );
 }
 
-const estilos = StyleSheet.create({
-  tela: {
-    flex: 1,
-    backgroundColor: Marca.quadra,
-    paddingHorizontal: Spacing.four,
-  },
-  centralizado: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  lista: {
-    gap: Spacing.two,
-    paddingVertical: Spacing.three,
-  },
-  presenca: {
-    alignItems: 'center',
-    backgroundColor: Marca.quadraClara,
-    borderRadius: 8,
-    flexDirection: 'row',
-    gap: Spacing.three,
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.three,
-  },
-  caixa: {
-    alignItems: 'center',
-    borderColor: Marca.linha,
-    borderRadius: 4,
-    borderWidth: 2,
-    height: 24,
-    justifyContent: 'center',
-    width: 24,
-  },
-  caixaMarcada: {
-    backgroundColor: Marca.ataque,
-    borderColor: Marca.ataque,
-  },
-  marca: {
-    color: Marca.linha,
-    fontSize: 15,
-    fontWeight: '900',
-    lineHeight: 18,
-  },
-  nome: {
-    color: Marca.linha,
-    flexShrink: 1,
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  nomeAusente: {
-    color: Marca.quadra,
-    textDecorationLine: 'line-through',
-  },
-  carta: {
-    backgroundColor: Marca.quadraClara,
-    borderRadius: 10,
-    gap: Spacing.one,
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.three,
-  },
-  tituloDoTime: {
-    color: Marca.ataqueClaro,
-    fontSize: 13,
-    fontWeight: '800',
-    letterSpacing: 1.5,
-    marginBottom: Spacing.one,
-    textTransform: 'uppercase',
-  },
-  tamanhoDoTime: {
-    color: Marca.quadra,
-    fontWeight: '700',
-    letterSpacing: 0,
-  },
-  jogador: {
-    color: Marca.linha,
-    fontSize: 17,
-    fontWeight: '600',
-  },
-  rodape: {
-    gap: Spacing.two,
-    paddingBottom: Spacing.four,
-    paddingTop: Spacing.two,
-  },
-  contagem: {
-    color: Marca.linha,
-    fontSize: 15,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  aviso: {
-    color: Marca.ataqueClaro,
-    fontSize: 13,
-    lineHeight: 19,
-    textAlign: 'center',
-  },
-  erro: {
-    color: Marca.ataqueClaro,
-    fontSize: 14,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  pressionado: {
-    opacity: 0.7,
-  },
-});
+function criarEstilos(cores: Cores) {
+  return StyleSheet.create({
+    tela: {
+      flex: 1,
+      backgroundColor: cores.fundo,
+      paddingHorizontal: Spacing.four,
+    },
+    centralizado: {
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    lista: {
+      gap: Spacing.two,
+      paddingVertical: Spacing.three,
+    },
+    presenca: {
+      alignItems: 'center',
+      backgroundColor: cores.superficie,
+      borderRadius: 8,
+      flexDirection: 'row',
+      gap: Spacing.three,
+      paddingHorizontal: Spacing.three,
+      paddingVertical: Spacing.three,
+    },
+    caixa: {
+      alignItems: 'center',
+      borderColor: cores.texto,
+      borderRadius: 4,
+      borderWidth: 2,
+      height: 24,
+      justifyContent: 'center',
+      width: 24,
+    },
+    caixaMarcada: {
+      backgroundColor: cores.destaque,
+      borderColor: cores.destaque,
+    },
+    marca: {
+      color: cores.texto,
+      fontSize: 15,
+      fontWeight: '900',
+      lineHeight: 18,
+    },
+    nome: {
+      color: cores.texto,
+      flexShrink: 1,
+      fontSize: 16,
+      fontWeight: '600',
+    },
+    nomeAusente: {
+      color: cores.textoFraco,
+      textDecorationLine: 'line-through',
+    },
+    carta: {
+      backgroundColor: cores.superficie,
+      borderRadius: 10,
+      gap: Spacing.one,
+      paddingHorizontal: Spacing.three,
+      paddingVertical: Spacing.three,
+    },
+    tituloDoTime: {
+      color: cores.textoFraco,
+      fontSize: 13,
+      fontWeight: '800',
+      letterSpacing: 1.5,
+      marginBottom: Spacing.one,
+      textTransform: 'uppercase',
+    },
+    tamanhoDoTime: {
+      color: cores.textoFraco,
+      fontWeight: '700',
+      letterSpacing: 0,
+    },
+    jogador: {
+      color: cores.texto,
+      fontSize: 17,
+      fontWeight: '600',
+    },
+    rodape: {
+      gap: Spacing.two,
+      paddingBottom: Spacing.four,
+      paddingTop: Spacing.two,
+    },
+    contagem: {
+      color: cores.texto,
+      fontSize: 15,
+      fontWeight: '600',
+      textAlign: 'center',
+    },
+    aviso: {
+      color: cores.textoFraco,
+      fontSize: 13,
+      lineHeight: 19,
+      textAlign: 'center',
+    },
+    erro: {
+      color: cores.textoFraco,
+      fontSize: 14,
+      fontWeight: '600',
+      textAlign: 'center',
+    },
+    pressionado: {
+      opacity: 0.7,
+    },
+  });
+}
