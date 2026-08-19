@@ -242,7 +242,7 @@ function criarEstilos(cores: Cores) {
     },
     caixaMarcada: {
       backgroundColor: cores.destaque,
-      borderColor: cores.destaque,
+      borderColor: cores.destaqueForte,
     },
     marca: {
       color: cores.texto,

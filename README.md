@@ -67,6 +67,14 @@ Gera todos os PNGs de `assets/images/` a partir da paleta da marca, sem
 dependência externa — PNG é um formato simples e o Node já traz o `zlib`. Ver
 [scripts/gerar-icones.js](scripts/gerar-icones.js).
 
+```bash
+npm run contraste
+```
+
+Confere a raz�o de contraste da WCAG entre os pares de cor que as telas usam,
+nos dois temas. Rodar depois de mexer na paleta: contraste ruim compila limpo
+e s� aparece na tela.
+
 ## Banco
 
 As migrações são aplicadas à mão pelo SQL Editor do painel: não há Supabase CLI

@@ -19,9 +19,12 @@ export const Colors = {
     texto: '#1A1013',
     textoFraco: '#7A5A66',
     destaque: '#E06090',
-    destaqueForte: '#C2477A',
-    textoSobreDestaque: '#FFFFFF',
-    borda: '#F0C8D8',
+    destaqueForte: '#CF2960',
+    // Texto escuro, e nao branco, sobre o rosa do logo: branco sobre ele da
+    // 3,36:1 e nao passa, enquanto o escuro da 5,25:1. Preserva a cor da marca
+    // no botao em vez de escurecer o rosa para o branco caber.
+    textoSobreDestaque: '#1A1013',
+    borda: '#A78893',
   },
   dark: {
     fundo: '#2B0D18',
@@ -30,9 +33,9 @@ export const Colors = {
     texto: '#F7F0F3',
     textoFraco: '#D89AB2',
     destaque: '#F0A0C0',
-    destaqueForte: '#E06090',
+    destaqueForte: '#E0648D',
     textoSobreDestaque: '#2B0D18',
-    borda: '#6B2B41',
+    borda: '#805E69',
   },
 } as const;
 

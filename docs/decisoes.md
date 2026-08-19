@@ -241,6 +241,17 @@ anonimato. O objetivo é inviabilizar a desanonimização casual.
   houver `supabase gen types`, asserção explícita na borda é mais honesta que
   brigar com a inferência — o contrato de verdade está na migração.
 
+- **Contraste ruim compila limpo.** O tema claro nasceu com o texto do botão
+  primário em 3,36:1 sobre o rosa, e as bordas em 1,50:1 — o `tsc` não tem como
+  reclamar disso, e no aparelho é o tipo de coisa que só se percebe quando
+  alguém não consegue ler. `npm run contraste` mede os pares que as telas usam,
+  nos dois temas. Rodar depois de qualquer mexida na paleta.
+- **Onde a acessibilidade e a fidelidade à marca brigaram, ganhou o texto.** O
+  botão primário do tema claro manteve o rosa exato do logo e escureceu o texto,
+  em vez de escurecer o rosa para o branco caber: 5,54:1 em vez de 3,36:1, e a
+  cor da marca intacta. Já `destaqueForte` e `borda` tiveram de sair do tom do
+  logo — texto sobre branco precisa de 4,5:1, e não há rosa claro que alcance.
+
 ## Ambiente
 
 Windows, sem Mac. Rede classificada como `Public`, então o firewall bloqueia o
