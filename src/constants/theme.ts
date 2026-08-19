@@ -1,42 +1,47 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
-
 import '@/global.css';
 
 import { Platform } from 'react-native';
 
+/**
+ * A paleta sai do logo do grupo: rosa da chama, rosa claro do "KT", branco da
+ * bola. Os nomes sao por papel e nao por cor -- `fundo` continua sendo fundo
+ * nos dois temas, enquanto "rosa claro" seria texto em um e destaque no outro.
+ *
+ * No claro o destaque e o rosa cheio, que precisa de texto branco por cima. No
+ * escuro ele clareia, para ter contraste contra o vinho, e ai o texto por cima
+ * escurece. E o que `textoSobreDestaque` resolve.
+ */
 export const Colors = {
   light: {
-    text: '#000000',
-    background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
+    fundo: '#FFFFFF',
+    superficie: '#FDEEF3',
+    superficieForte: '#F7D9E4',
+    texto: '#1A1013',
+    textoFraco: '#7A5A66',
+    destaque: '#E06090',
+    destaqueForte: '#CF2960',
+    // Texto escuro, e nao branco, sobre o rosa do logo: branco sobre ele da
+    // 3,36:1 e nao passa, enquanto o escuro da 5,25:1. Preserva a cor da marca
+    // no botao em vez de escurecer o rosa para o branco caber.
+    textoSobreDestaque: '#1A1013',
+    borda: '#A78893',
   },
   dark: {
-    text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
+    fundo: '#2B0D18',
+    superficie: '#43172A',
+    superficieForte: '#5C2239',
+    texto: '#F7F0F3',
+    textoFraco: '#D89AB2',
+    destaque: '#F0A0C0',
+    destaqueForte: '#E0648D',
+    textoSobreDestaque: '#2B0D18',
+    borda: '#805E69',
   },
 } as const;
 
+export type EsquemaDeCores = keyof typeof Colors;
+export type Cores = (typeof Colors)[EsquemaDeCores];
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
-
-/**
- * Identidade do app, tirada das cores de uma quadra de volei: azul de quadra,
- * laranja da zona de ataque, branco de linha demarcatoria.
- */
-export const Marca = {
-  quadra: '#0B2E45',
-  quadraClara: '#17607E',
-  ataque: '#C25E22',
-  ataqueClaro: '#E58B4C',
-  linha: '#F2F5F7',
-} as const;
 
 export const Fonts = Platform.select({
   ios: {

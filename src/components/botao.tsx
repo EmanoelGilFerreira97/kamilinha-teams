@@ -1,6 +1,15 @@
-import { ActivityIndicator, Pressable, StyleSheet, Text, type StyleProp, type ViewStyle } from 'react-native';
+import { useMemo } from 'react';
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
 
-import { Marca, Spacing } from '@/constants/theme';
+import { Spacing, type Cores } from '@/constants/theme';
+import { useTema } from '@/contexts/tema';
 
 type Props = {
   titulo: string;
@@ -21,6 +30,9 @@ export function Botao({
   variante = 'primario',
   estilo,
 }: Props) {
+  const { cores } = useTema();
+  const estilos = useMemo(() => criarEstilos(cores), [cores]);
+
   const secundario = variante === 'secundario';
   const bloqueado = carregando || desativado;
 
@@ -38,7 +50,7 @@ export function Botao({
         estilo,
       ]}>
       {carregando ? (
-        <ActivityIndicator color={secundario ? Marca.linha : Marca.quadra} />
+        <ActivityIndicator color={secundario ? cores.destaque : cores.textoSobreDestaque} />
       ) : (
         <Text style={[estilos.texto, secundario && estilos.textoSecundario]}>{titulo}</Text>
       )}
@@ -46,34 +58,36 @@ export function Botao({
   );
 }
 
-const estilos = StyleSheet.create({
-  base: {
-    borderRadius: 6,
-    paddingVertical: Spacing.four,
-    paddingHorizontal: Spacing.three,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 56,
-  },
-  primario: {
-    backgroundColor: Marca.linha,
-  },
-  secundario: {
-    borderColor: Marca.quadraClara,
-    borderWidth: 1,
-  },
-  pressionado: {
-    opacity: 0.85,
-  },
-  bloqueado: {
-    opacity: 0.6,
-  },
-  texto: {
-    color: Marca.quadra,
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  textoSecundario: {
-    color: Marca.linha,
-  },
-});
+function criarEstilos(cores: Cores) {
+  return StyleSheet.create({
+    base: {
+      borderRadius: 6,
+      paddingVertical: Spacing.four,
+      paddingHorizontal: Spacing.three,
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: 56,
+    },
+    primario: {
+      backgroundColor: cores.destaque,
+    },
+    secundario: {
+      borderColor: cores.borda,
+      borderWidth: 1,
+    },
+    pressionado: {
+      opacity: 0.85,
+    },
+    bloqueado: {
+      opacity: 0.6,
+    },
+    texto: {
+      color: cores.textoSobreDestaque,
+      fontSize: 16,
+      fontWeight: '700',
+    },
+    textoSecundario: {
+      color: cores.texto,
+    },
+  });
+}

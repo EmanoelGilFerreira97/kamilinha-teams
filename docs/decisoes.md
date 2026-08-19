@@ -58,6 +58,40 @@ O código já sai pronto para os dois.
   devolvendo nota nem soma de time — soma de time com três companheiros
   conhecidos resolveria o seu número exatamente. Limite aceito, como o do
   conluio.
+- **Distribuição é pela Play Store, em teste fechado.** Substitui o plano de
+  mandar APK no grupo: o teste fechado atualiza sozinho no aparelho das pessoas,
+  e os 14 dias exigidos correm enquanto o grupo joga. Isso também tira a
+  urgência do `expo-updates` — ele segue bom para iterar JS em minutos, mas
+  deixa de ser o que evita 12 reinstalações a cada versão.
+- **Apagar a conta transfere a posse da turma para o membro mais antigo.**
+  `grupos.dono_id` tem `on delete cascade`, então sem isso uma pessoa saindo
+  levaria junto a turma, os membros e as notas de todo mundo. Só quando não
+  sobra mais ninguém a turma vai junto com o dono.
+- **O dono pode apagar a turma**, como ação explícita e separada de sair dela.
+- **Assinatura de função vira contrato público no primeiro APK instalado.**
+  Migração vale na hora; o app instalado não. Acrescentar função nova em vez de
+  mudar assinatura existente, e parâmetro novo sempre com valor padrão — senão o
+  celular que não atualizou quebra, e quebra em silêncio.
+
+- **A paleta sai do logo do grupo**, e vem em dois temas que a pessoa escolhe:
+  claro (fundo branco, rosa de destaque) e escuro (fundo vinho, rosa claro). O
+  padrão segue o aparelho, e a escolha manual sobrevive ao fechar o app, em
+  `AsyncStorage`. O botão fica no topo da tela inicial e roda entre
+  `auto` → `claro` → `escuro`.
+- **Os tokens de cor têm nome de papel, não de cor.** `fundo`, `superficie`,
+  `texto`, `textoFraco`, `destaque`, `destaqueForte`, `textoSobreDestaque`,
+  `borda`. "Rosa claro" seria texto em um tema e destaque no outro; `destaque`
+  é destaque nos dois. Foi o que aposentou o vocabulário de quadra —
+  `Marca.quadra` e `Marca.ataque` morreram com o azul e o laranja.
+- **O sistema de temas do template virou a base disso.** `Colors`, `useTheme`,
+  `themed-text` e `themed-view` ficaram quatro fases sem consumidor e foram
+  preservados de propósito; a paleta nova entrou neles em vez de num sistema
+  paralelo.
+- **O ícone é o logo sem o banner do "VÔLEI".** A 48px na gaveta a tipografia
+  vira borrão, e o que sobrevive é a chama com a bola e o "KT". A base das
+  letras e o topo do banner são colados no desenho, então não há corte reto que
+  pegue uma sem a outra — o rodapé é desvanecido, e a sobra dissolve no fundo.
+  `scripts/gerar-icones.js` faz o recorte a partir de `assets/logo.png`.
 - **Texto que a pessoa lê leva acento; identificador e comentário, não.** Isso
   inclui as mensagens de `raise exception` das funções: elas sobem pelo
   PostgREST e o cliente mostra `error.message` como está, então são copy de
@@ -137,7 +171,16 @@ anonimato. O objetivo é inviabilizar a desanonimização casual.
   quem veio hoje escolhido na tela, embaralhando empates para os times variarem
   a cada rodada. Testado no APK. De fora, com a anon key, as seis funções
   barradas; e o ACL de `overall_do_grupo` conferido sem `authenticated`.
-- **05 — Acabamento e publicação.**
+- **05 — Acabamento e publicação.** Concluída. Ícone a partir do logo do grupo,
+  paleta rosa em tema claro e escuro à escolha da pessoa, contraste conferido
+  nos dois, README do projeto e limpeza do que sobrou do template.
+- **06 — Publicação na Play Store.** Conta de desenvolvedor, política de
+  privacidade em URL pública, Data Safety, classificação de conteúdo, ficha da
+  loja e AAB. No código: exclusão de conta, que a Play exige de todo app com
+  cadastro, com transferência de posse junto; e exclusão de turma pelo dono.
+  Entra por teste fechado: conta pessoal criada depois de 13/11/2023 precisa de
+  12 testadores inscritos por 14 dias seguidos antes de pedir acesso à produção.
+- **Depois.** Mais funcionalidades, e só então a versão final do front-end.
 
 ## Armadilhas já encontradas
 
@@ -217,6 +260,17 @@ anonimato. O objetivo é inviabilizar a desanonimização casual.
   devolve conjunto reclama de "cannot cast single object to array". Enquanto não
   houver `supabase gen types`, asserção explícita na borda é mais honesta que
   brigar com a inferência — o contrato de verdade está na migração.
+
+- **Contraste ruim compila limpo.** O tema claro nasceu com o texto do botão
+  primário em 3,36:1 sobre o rosa, e as bordas em 1,50:1 — o `tsc` não tem como
+  reclamar disso, e no aparelho é o tipo de coisa que só se percebe quando
+  alguém não consegue ler. `npm run contraste` mede os pares que as telas usam,
+  nos dois temas. Rodar depois de qualquer mexida na paleta.
+- **Onde a acessibilidade e a fidelidade à marca brigaram, ganhou o texto.** O
+  botão primário do tema claro manteve o rosa exato do logo e escureceu o texto,
+  em vez de escurecer o rosa para o branco caber: 5,54:1 em vez de 3,36:1, e a
+  cor da marca intacta. Já `destaqueForte` e `borda` tiveram de sair do tom do
+  logo — texto sobre branco precisa de 4,5:1, e não há rosa claro que alcance.
 
 ## Ambiente
 

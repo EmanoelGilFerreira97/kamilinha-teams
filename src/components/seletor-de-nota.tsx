@@ -1,7 +1,8 @@
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { PanResponder, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { Marca, Spacing } from '@/constants/theme';
+import { Spacing, type Cores } from '@/constants/theme';
+import { useTema } from '@/contexts/tema';
 import { NOTA_MAXIMA, NOTA_MINIMA } from '@/lib/notas';
 
 type Props = {
@@ -11,15 +12,16 @@ type Props = {
 };
 
 /**
- * Barra de 0 a 100 no estilo carta do FIFA, arrastavel, com passo fino nos
- * botoes das pontas -- acertar um valor exato arrastando com o dedo em uma
- * escala de 101 posicoes nao acontece.
+ * Barra de 0 a 100, arrastavel, com passo fino nos botoes das pontas -- acertar
+ * um valor exato arrastando o dedo em uma escala de 101 posicoes nao acontece.
  *
  * Feita com PanResponder, que e do core do React Native. Um slider de
  * biblioteca traria modulo nativo, e modulo nativo novo obriga a gerar outro
  * development build antes de dar para testar qualquer coisa.
  */
 export function SeletorDeNota({ rotulo, valor, aoMudar }: Props) {
+  const { cores } = useTema();
+  const estilos = useMemo(() => criarEstilos(cores), [cores]);
   const [largura, setLargura] = useState(0);
 
   // O PanResponder e montado uma vez e fecha sobre o primeiro render; sem as
@@ -64,7 +66,7 @@ export function SeletorDeNota({ rotulo, valor, aoMudar }: Props) {
       </View>
 
       <View style={estilos.linhaDaBarra}>
-        <BotaoDePasso rotulo="−" aoTocar={() => passo(-1)} />
+        <BotaoDePasso rotulo="−" aoTocar={() => passo(-1)} estilos={estilos} />
 
         <View
           accessibilityRole="adjustable"
@@ -81,13 +83,21 @@ export function SeletorDeNota({ rotulo, valor, aoMudar }: Props) {
           <View style={[estilos.botao, { left: Math.max(0, preenchido - 11) }]} />
         </View>
 
-        <BotaoDePasso rotulo="+" aoTocar={() => passo(1)} />
+        <BotaoDePasso rotulo="+" aoTocar={() => passo(1)} estilos={estilos} />
       </View>
     </View>
   );
 }
 
-function BotaoDePasso({ rotulo, aoTocar }: { rotulo: string; aoTocar: () => void }) {
+function BotaoDePasso({
+  rotulo,
+  aoTocar,
+  estilos,
+}: {
+  rotulo: string;
+  aoTocar: () => void;
+  estilos: ReturnType<typeof criarEstilos>;
+}) {
   return (
     <Pressable
       accessibilityRole="button"
@@ -103,69 +113,71 @@ function BotaoDePasso({ rotulo, aoTocar }: { rotulo: string; aoTocar: () => void
 const ALTURA_DO_TRILHO = 10;
 const LADO_DO_BOTAO = 22;
 
-const estilos = StyleSheet.create({
-  bloco: {
-    gap: Spacing.two,
-  },
-  linhaDoTopo: {
-    alignItems: 'baseline',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  rotulo: {
-    color: Marca.linha,
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  valor: {
-    color: Marca.ataqueClaro,
-    fontSize: 26,
-    fontWeight: '800',
-    fontVariant: ['tabular-nums'],
-  },
-  linhaDaBarra: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: Spacing.three,
-  },
-  trilho: {
-    backgroundColor: Marca.quadraClara,
-    borderRadius: ALTURA_DO_TRILHO / 2,
-    flex: 1,
-    height: ALTURA_DO_TRILHO,
-    justifyContent: 'center',
-    // Area de toque maior que o desenho, sem mexer no layout.
-    paddingVertical: Spacing.three,
-    marginVertical: -Spacing.three,
-  },
-  preenchimento: {
-    backgroundColor: Marca.ataque,
-    borderRadius: ALTURA_DO_TRILHO / 2,
-    height: ALTURA_DO_TRILHO,
-  },
-  botao: {
-    backgroundColor: Marca.linha,
-    borderRadius: LADO_DO_BOTAO / 2,
-    height: LADO_DO_BOTAO,
-    position: 'absolute',
-    width: LADO_DO_BOTAO,
-  },
-  passo: {
-    alignItems: 'center',
-    borderColor: Marca.quadraClara,
-    borderRadius: 6,
-    borderWidth: 1,
-    height: 40,
-    justifyContent: 'center',
-    width: 40,
-  },
-  textoDoPasso: {
-    color: Marca.linha,
-    fontSize: 20,
-    fontWeight: '700',
-    lineHeight: 24,
-  },
-  pressionado: {
-    opacity: 0.6,
-  },
-});
+function criarEstilos(cores: Cores) {
+  return StyleSheet.create({
+    bloco: {
+      gap: Spacing.two,
+    },
+    linhaDoTopo: {
+      alignItems: 'baseline',
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+    },
+    rotulo: {
+      color: cores.texto,
+      fontSize: 16,
+      fontWeight: '600',
+    },
+    valor: {
+      color: cores.destaqueForte,
+      fontSize: 26,
+      fontWeight: '800',
+      fontVariant: ['tabular-nums'],
+    },
+    linhaDaBarra: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      gap: Spacing.three,
+    },
+    trilho: {
+      backgroundColor: cores.superficieForte,
+      borderRadius: ALTURA_DO_TRILHO / 2,
+      flex: 1,
+      height: ALTURA_DO_TRILHO,
+      justifyContent: 'center',
+      // Area de toque maior que o desenho, sem mexer no layout.
+      paddingVertical: Spacing.three,
+      marginVertical: -Spacing.three,
+    },
+    preenchimento: {
+      backgroundColor: cores.destaque,
+      borderRadius: ALTURA_DO_TRILHO / 2,
+      height: ALTURA_DO_TRILHO,
+    },
+    botao: {
+      backgroundColor: cores.texto,
+      borderRadius: LADO_DO_BOTAO / 2,
+      height: LADO_DO_BOTAO,
+      position: 'absolute',
+      width: LADO_DO_BOTAO,
+    },
+    passo: {
+      alignItems: 'center',
+      borderColor: cores.borda,
+      borderRadius: 6,
+      borderWidth: 1,
+      height: 40,
+      justifyContent: 'center',
+      width: 40,
+    },
+    textoDoPasso: {
+      color: cores.texto,
+      fontSize: 20,
+      fontWeight: '700',
+      lineHeight: 24,
+    },
+    pressionado: {
+      opacity: 0.6,
+    },
+  });
+}

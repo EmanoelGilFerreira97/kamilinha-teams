@@ -1,10 +1,10 @@
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import { useColorScheme } from 'react-native';
 
-import { Marca } from '@/constants/theme';
 import { AuthProvider, useAuth } from '@/contexts/auth';
+import { TemaProvider, useTema } from '@/contexts/tema';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -14,6 +14,7 @@ SplashScreen.preventAutoHideAsync();
  */
 function GuardaDeRota() {
   const { sessao, carregando } = useAuth();
+  const { cores } = useTema();
   const segmentos = useSegments();
   const router = useRouter();
 
@@ -41,24 +42,36 @@ function GuardaDeRota() {
         // volta com <Stack.Screen options={{ headerShown: true }} />, e a cor
         // fica aqui para nao repetir a paleta em cada rota.
         headerShown: false,
-        headerStyle: { backgroundColor: Marca.quadra },
-        headerTintColor: Marca.linha,
+        headerStyle: { backgroundColor: cores.fundo },
+        headerTintColor: cores.texto,
         headerTitleStyle: { fontWeight: '700' },
         // Sem isto o fundo branco do navegador pisca entre uma tela e outra.
-        contentStyle: { backgroundColor: Marca.quadra },
+        contentStyle: { backgroundColor: cores.fundo },
       }}
     />
   );
 }
 
-export default function RootLayout() {
-  const esquemaDeCores = useColorScheme();
+/** Fica separado do RootLayout porque precisa estar dentro do TemaProvider. */
+function Raiz() {
+  const { esquema } = useTema();
 
   return (
-    <ThemeProvider value={esquemaDeCores === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={esquema === 'dark' ? DarkTheme : DefaultTheme}>
+      {/* No tema claro os icones da barra de status precisam escurecer, senao
+          somem no fundo branco. */}
+      <StatusBar style={esquema === 'dark' ? 'light' : 'dark'} />
       <AuthProvider>
         <GuardaDeRota />
       </AuthProvider>
     </ThemeProvider>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <TemaProvider>
+      <Raiz />
+    </TemaProvider>
   );
 }

@@ -1,15 +1,18 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Botao } from '@/components/botao';
 import { SeletorDeNota } from '@/components/seletor-de-nota';
-import { Marca, Spacing } from '@/constants/theme';
+import { Spacing, type Cores } from '@/constants/theme';
+import { useTema } from '@/contexts/tema';
 import { mensagemDeErro } from '@/lib/erros';
 import { avaliar, listarMinhasNotas, NOTA_PADRAO } from '@/lib/notas';
 import { listarMembros } from '@/lib/turmas';
 
 export default function Avaliar() {
+  const { cores } = useTema();
+  const estilos = useMemo(() => criarEstilos(cores), [cores]);
   const { id, jogador } = useLocalSearchParams<{ id: string; jogador: string }>();
   const router = useRouter();
 
@@ -73,7 +76,7 @@ export default function Avaliar() {
       <>
         <Stack.Screen options={{ headerShown: true, title: 'Avaliar' }} />
         <View style={[estilos.tela, estilos.centralizado]}>
-          <ActivityIndicator color={Marca.ataqueClaro} />
+          <ActivityIndicator color={cores.destaque} />
         </View>
       </>
     );
@@ -112,52 +115,54 @@ export default function Avaliar() {
   );
 }
 
-const estilos = StyleSheet.create({
-  tela: {
-    flex: 1,
-    backgroundColor: Marca.quadra,
-    paddingHorizontal: Spacing.four,
-  },
-  centralizado: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  conteudo: {
-    gap: Spacing.five,
-    paddingBottom: Spacing.four,
-    paddingTop: Spacing.four,
-  },
-  carta: {
-    alignItems: 'center',
-    backgroundColor: Marca.quadraClara,
-    borderRadius: 12,
-    paddingVertical: Spacing.four,
-  },
-  overall: {
-    color: Marca.linha,
-    fontSize: 64,
-    fontWeight: '800',
-    fontVariant: ['tabular-nums'],
-    lineHeight: 70,
-  },
-  rotuloDoOverall: {
-    color: Marca.ataqueClaro,
-    fontSize: 13,
-    fontWeight: '700',
-    letterSpacing: 2,
-    textTransform: 'uppercase',
-  },
-  aviso: {
-    color: Marca.ataqueClaro,
-    fontSize: 13,
-    lineHeight: 19,
-  },
-  erro: {
-    color: Marca.ataqueClaro,
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  botao: {
-    marginBottom: Spacing.four,
-  },
-});
+function criarEstilos(cores: Cores) {
+  return StyleSheet.create({
+    tela: {
+      flex: 1,
+      backgroundColor: cores.fundo,
+      paddingHorizontal: Spacing.four,
+    },
+    centralizado: {
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    conteudo: {
+      gap: Spacing.five,
+      paddingBottom: Spacing.four,
+      paddingTop: Spacing.four,
+    },
+    carta: {
+      alignItems: 'center',
+      backgroundColor: cores.superficie,
+      borderRadius: 12,
+      paddingVertical: Spacing.four,
+    },
+    overall: {
+      color: cores.texto,
+      fontSize: 64,
+      fontWeight: '800',
+      fontVariant: ['tabular-nums'],
+      lineHeight: 70,
+    },
+    rotuloDoOverall: {
+      color: cores.textoFraco,
+      fontSize: 13,
+      fontWeight: '700',
+      letterSpacing: 2,
+      textTransform: 'uppercase',
+    },
+    aviso: {
+      color: cores.textoFraco,
+      fontSize: 13,
+      lineHeight: 19,
+    },
+    erro: {
+      color: cores.textoFraco,
+      fontSize: 14,
+      fontWeight: '600',
+    },
+    botao: {
+      marginBottom: Spacing.four,
+    },
+  });
+}
