@@ -17,6 +17,7 @@ que o projeto adotar `supabase db push` nao precisar renomear nada.
 | `20260818170000_alcance_das_funcoes.sql` | 02 | Corrige os `revoke` do arquivo acima, que nao pegaram |
 | `20260818180000_mensagens_acentuadas.sql` | 02 | Acentua as mensagens das RPC, que aparecem na tela |
 | `20260818200000_notas_e_anonimato.sql` | 03 | `notas` sem policy nenhuma, `avaliar()`, `minhas_notas()` e o agregado |
+| `20260818210000_sorteio.sql` | 04 | `sortear_times()`, e a formula bayesiana movida para `overall_do_grupo()` |
 
 ## Conferindo que a RLS pegou
 
