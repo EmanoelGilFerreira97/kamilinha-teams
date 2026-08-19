@@ -272,6 +272,23 @@ anonimato. O objetivo é inviabilizar a desanonimização casual.
   cor da marca intacta. Já `destaqueForte` e `borda` tiveram de sair do tom do
   logo — texto sobre branco precisa de 4,5:1, e não há rosa claro que alcance.
 
+- **O build sai de um commit, não da árvore de trabalho — e commit não é
+  build.** O ícone "não atualizou" por duas horas porque o build mais recente
+  tinha saído de um commit anterior à mudança, e depois porque nenhum build novo
+  chegou a ser submetido. `npx eas-cli build:list` mostra o commit de cada build:
+  conferir isso **antes** de concluir que a mudança não funcionou, e antes de
+  procurar culpa no código.
+- **O lançador do Android guarda o ícone em cache.** Instalar por cima nem
+  sempre troca o ícone, mesmo com o APK certo. Desinstalar antes de instalar, ou
+  reiniciar o aparelho, elimina essa variável.
+- **PR fechado sem merge pode ter trabalho de verdade, e a branch some.** Os PRs
+  #5 a #8 foram fechados por engano com quatro correções reais — `sair()` sem
+  captura de rejeição, corrida no recarregar por foco, `window is not defined` no
+  pré-render da web, e o `expo lint` que dessincronizava o lockfile. Quando fui
+  recuperá-los as branches já não existiam no remoto, e só o diff que o GitHub
+  retém salvou. Rodar `gh pr list --state closed` antes de assumir que a `main`
+  tem tudo.
+
 ## Ambiente
 
 Windows, sem Mac. Rede classificada como `Public`, então o firewall bloqueia o

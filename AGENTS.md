@@ -23,3 +23,7 @@ mudança seja pedida explicitamente.
 - Rotas em `src/app`, resto do código em `src/`.
 - Rodar `npx tsc --noEmit` antes de commitar.
 - Rodar `npm ci --dry-run` ao mexer em dependência: é a checagem que o EAS faz.
+- Rodar `npm run contraste` ao mexer na paleta: contraste ruim compila limpo.
+- Texto que a pessoa lê leva acento; identificador e comentário, não. Isso vale
+  também para as mensagens de `raise exception` das funções do banco, que
+  chegam inteiras na tela.
