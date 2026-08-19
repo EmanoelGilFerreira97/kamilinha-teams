@@ -1,56 +1,94 @@
-# Welcome to your Expo app 👋
+# Kamilinha Teams
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+App de vôlei: turmas, avaliação anônima entre quem joga e sorteio de quartetos
+equilibrados toda semana. Expo + React Native na frente, Supabase (Postgres) atrás.
 
-## Get started
+O anonimato das notas é o requisito central do produto, e ele vive nas policies
+de RLS do Postgres — não na interface. Antes de mexer em qualquer coisa, leia
+**[docs/decisoes.md](docs/decisoes.md)**: ele traz a stack, as decisões já
+fechadas, o modelo de anonimato e as armadilhas que já custaram depuração.
 
-1. Install dependencies
+## Configuração
+
+1. Instale as dependências com o mesmo comando que o EAS usa:
 
    ```bash
-   npm install
+   npm ci
    ```
 
-2. Start the app
+2. Copie `.env.example` para `.env.local` e preencha os dois valores:
+
+   ```bash
+   cp .env.example .env.local
+   ```
+
+   **Sem esse arquivo o app não sobe**: `src/lib/supabase.ts` lança já no
+   import. São a URL e a *anon key* do seu projeto Supabase. A `service_role`
+   nunca entra aqui — ela ignora toda a RLS.
+
+3. Aplique as migrações no seu projeto Supabase, em ordem crescente de nome.
+   O passo a passo está em **[supabase/README.md](supabase/README.md)**.
+
+4. Suba o servidor de desenvolvimento:
 
    ```bash
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+## Rodar no aparelho
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+O app usa módulos nativos (`@expo/ui`, `expo-glass-effect`, `expo-symbols`,
+`expo-dev-client`), então **o Expo Go não serve** — é preciso um development
+build instalado no aparelho:
 
 ```bash
-npm run reset-project
+npx eas-cli@latest build --profile development --platform android
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+O `eas-cli` roda por `npx` de propósito: como dependência do projeto ele arrasta
+um TypeScript conflitante e dessincroniza o lockfile. Está registrado nas
+armadilhas do `docs/decisoes.md`.
 
-### Other setup steps
+Vale lembrar que **módulo nativo novo exige build novo**. O APK instalado só tem
+os módulos que existiam quando ele foi gerado; adicionar um pacote com código
+nativo e rodar `npx expo start` não basta.
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+## Antes de commitar
 
-## Learn more
+```bash
+npx tsc --noEmit
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+E, ao mexer em dependência, a checagem que o EAS faz:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+npm ci --dry-run
+```
 
-## Join the community
+**O `tsc` precisa que o servidor tenha rodado pelo menos uma vez.** Os tipos
+gerados — `expo-env.d.ts` e `.expo/types/` — nascem do `npx expo start` e estão
+no `.gitignore`. Em árvore recém-clonada, antes disso, o `tsc` acusa erros que
+não existem: rota inexistente nos `router.push`, e `TS2882` no import de
+`src/global.css` (a declaração de módulo `*.css` vem do `expo/types`, alcançado
+só pelo `expo-env.d.ts`).
 
-Join our community of developers creating universal apps.
+## Estrutura
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+| Caminho | O que tem |
+|---|---|
+| `src/app/` | Rotas, e só rotas — layout e telas do expo-router |
+| `src/lib/` | Conversa com o Supabase: auth, turmas, notas, sorteio |
+| `src/components/` | Componentes de interface reaproveitados entre telas |
+| `src/contexts/` | Sessão de autenticação |
+| `src/hooks/` | Hooks de tema e esquema de cores |
+| `src/constants/` | Paleta, espaçamentos e tipografia |
+| `supabase/migrations/` | O esquema, a RLS e as funções — aplicadas à mão |
+| `docs/decisoes.md` | Stack, decisões fechadas, fases e armadilhas |
+
+Rotas ficam em `src/app`; todo o resto do código, em `src/`.
+
+## Convenções
+
+Estão em **[AGENTS.md](AGENTS.md)**, em resumo: código e comentários em
+português, sem acento em identificador; comentário explica *por que*, não o que
+o código já diz.
