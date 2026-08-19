@@ -58,6 +58,21 @@ O código já sai pronto para os dois.
   devolvendo nota nem soma de time — soma de time com três companheiros
   conhecidos resolveria o seu número exatamente. Limite aceito, como o do
   conluio.
+- **Distribuição é pela Play Store, em teste fechado.** Substitui o plano de
+  mandar APK no grupo: o teste fechado atualiza sozinho no aparelho das pessoas,
+  e os 14 dias exigidos correm enquanto o grupo joga. Isso também tira a
+  urgência do `expo-updates` — ele segue bom para iterar JS em minutos, mas
+  deixa de ser o que evita 12 reinstalações a cada versão.
+- **Apagar a conta transfere a posse da turma para o membro mais antigo.**
+  `grupos.dono_id` tem `on delete cascade`, então sem isso uma pessoa saindo
+  levaria junto a turma, os membros e as notas de todo mundo. Só quando não
+  sobra mais ninguém a turma vai junto com o dono.
+- **O dono pode apagar a turma**, como ação explícita e separada de sair dela.
+- **Assinatura de função vira contrato público no primeiro APK instalado.**
+  Migração vale na hora; o app instalado não. Acrescentar função nova em vez de
+  mudar assinatura existente, e parâmetro novo sempre com valor padrão — senão o
+  celular que não atualizou quebra, e quebra em silêncio.
+
 - **A paleta sai do logo do grupo**, e vem em dois temas que a pessoa escolhe:
   claro (fundo branco, rosa de destaque) e escuro (fundo vinho, rosa claro). O
   padrão segue o aparelho, e a escolha manual sobrevive ao fechar o app, em
@@ -156,10 +171,15 @@ anonimato. O objetivo é inviabilizar a desanonimização casual.
   quem veio hoje escolhido na tela, embaralhando empates para os times variarem
   a cada rodada. Testado no APK. De fora, com a anon key, as seis funções
   barradas; e o ACL de `overall_do_grupo` conferido sem `authenticated`.
-- **05 — Acabamento e publicação.** Ícone próprio gerado da paleta, README do
-  projeto, limpeza do que sobrou do template. O APK sai pelo perfil `preview` e
-  é distribuído direto no grupo — sem loja, sem política de privacidade, sem
-  revisão.
+- **05 — Acabamento e publicação.** Concluída. Ícone a partir do logo do grupo,
+  paleta rosa em tema claro e escuro à escolha da pessoa, contraste conferido
+  nos dois, README do projeto e limpeza do que sobrou do template.
+- **06 — Publicação na Play Store.** Conta de desenvolvedor, política de
+  privacidade em URL pública, Data Safety, classificação de conteúdo, ficha da
+  loja e AAB. No código: exclusão de conta, que a Play exige de todo app com
+  cadastro, com transferência de posse junto; e exclusão de turma pelo dono.
+  Entra por teste fechado: conta pessoal criada depois de 13/11/2023 precisa de
+  12 testadores inscritos por 14 dias seguidos antes de pedir acesso à produção.
 - **Depois.** Mais funcionalidades, e só então a versão final do front-end.
 
 ## Armadilhas já encontradas
