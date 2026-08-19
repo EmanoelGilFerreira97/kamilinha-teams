@@ -180,7 +180,25 @@ anonimato. O objetivo é inviabilizar a desanonimização casual.
   cadastro, com transferência de posse junto; e exclusão de turma pelo dono.
   Entra por teste fechado: conta pessoal criada depois de 13/11/2023 precisa de
   12 testadores inscritos por 14 dias seguidos antes de pedir acesso à produção.
+  O banco está sem jogadores de teste desde o fim da fase 05: o
+  `limpar-turma-de-teste.sql` já rodou, e a turma real está limpa.
 - **Depois.** Mais funcionalidades, e só então a versão final do front-end.
+
+## Em aberto
+
+Decisões ainda não tomadas. Ficam separadas das fechadas de propósito, para
+ninguém as tratar como resolvidas.
+
+- **`expo-updates` — atualização de JavaScript pelo ar.** Deixou de ser urgente
+  quando a distribuição virou teste fechado da Play, que já atualiza sozinho no
+  aparelho das pessoas. Continua valendo para iterar em minutos em vez de a cada
+  build: ajuste de cor, texto ou regra de sorteio chegaria na próxima abertura
+  do app. O custo é dependência nova num projeto que evitou dependência nova o
+  tempo todo, módulo nativo (exige um build para entrar), e um `eas update` a
+  mais no fluxo. **Não decidido** — foi levantado no fim da fase 05 e ficou.
+- **Quais funcionalidades faltam antes da passada final de front-end.** Não
+  depende só de quem programa; o grupo tem opinião. Até haver lista, o visual
+  das telas é funcional e não final.
 
 ## Armadilhas já encontradas
 
