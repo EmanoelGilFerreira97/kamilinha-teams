@@ -1,6 +1,6 @@
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Botao } from '@/components/botao';
@@ -17,6 +17,7 @@ export default function MinhasTurmas() {
   // resposta "voce nao esta em turma nenhuma".
   const [turmas, setTurmas] = useState<Turma[] | null>(null);
   const [erro, setErro] = useState<string | null>(null);
+  const [saindo, setSaindo] = useState(false);
 
   const carregar = useCallback(async () => {
     try {
@@ -35,6 +36,19 @@ export default function MinhasTurmas() {
     }, [carregar])
   );
 
+  // sair() e assincrona e lanca quando o signOut falha. Ligada direto no
+  // onPress, a rejeicao nao tinha quem a pegasse e a pessoa continuava logada
+  // sem aviso nenhum. O guarda de rota leva para o login quando a sessao cai.
+  async function aoSair() {
+    setSaindo(true);
+    try {
+      await sair();
+    } catch (e) {
+      Alert.alert('Sair', mensagemDeErro(e, 'Não foi possível sair. Tente de novo.'));
+      setSaindo(false);
+    }
+  }
+
   const usuario = sessao?.user;
   const nomeCompleto =
     (usuario?.user_metadata?.full_name as string | undefined) ?? usuario?.email ?? '';
@@ -49,8 +63,10 @@ export default function MinhasTurmas() {
         </View>
         <Pressable
           accessibilityRole="button"
+          // Dois toques disparariam dois signOut.
+          disabled={saindo}
           hitSlop={Spacing.three}
-          onPress={sair}
+          onPress={() => void aoSair()}
           style={({ pressed }) => pressed && estilos.pressionado}>
           <Text style={estilos.sair}>Sair</Text>
         </Pressable>

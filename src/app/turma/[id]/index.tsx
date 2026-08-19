@@ -48,7 +48,7 @@ export default function DetalheDaTurma() {
   const meuId = sessao?.user.id;
   const souDono = turma !== null && turma.dono_id === meuId;
 
-  const carregar = useCallback(async () => {
+  const carregar = useCallback(async (continuaValendo: () => boolean) => {
     try {
       setErro(null);
       // As tres buscas sao independentes, e a lista e o conteudo principal da
@@ -58,6 +58,11 @@ export default function DetalheDaTurma() {
         listarMembros(id),
         listarNotasDaTurma(id),
       ]);
+
+      // Outra passagem por esta tela ja comecou enquanto estas tres buscas
+      // corriam; o que chegou aqui e resposta velha e nao pode sobrescrever a
+      // nova.
+      if (!continuaValendo()) return;
 
       if (turmaCarregada === null) {
         // A policy de select devolve vazio tanto para turma inexistente quanto
@@ -69,15 +74,19 @@ export default function DetalheDaTurma() {
       setTurma(turmaCarregada);
       setLinhas(montarLinhas(membros, notas));
     } catch (e) {
-      setErro(mensagemDeErro(e, 'Não foi possível carregar a turma.'));
+      if (continuaValendo()) setErro(mensagemDeErro(e, 'Não foi possível carregar a turma.'));
     } finally {
-      setCarregando(false);
+      if (continuaValendo()) setCarregando(false);
     }
   }, [id]);
 
   useFocusEffect(
     useCallback(() => {
-      void carregar();
+      let ativo = true;
+      void carregar(() => ativo);
+      return () => {
+        ativo = false;
+      };
     }, [carregar])
   );
 
