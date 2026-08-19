@@ -85,6 +85,48 @@ Lá também ficam os scripts de popular e limpar jogadores de teste, que existem
 porque o piso de cinco avaliadores torna as notas impossíveis de exercitar com
 uma conta só.
 
+## Antes de commitar
+
+```bash
+npx tsc --noEmit
+```
+
+Ao mexer em dependência, a checagem que o EAS faz:
+
+```bash
+npm ci --dry-run
+```
+
+Ao mexer na paleta:
+
+```bash
+npm run contraste
+```
+
+**O `tsc` precisa que o servidor tenha rodado pelo menos uma vez.** Os tipos
+gerados — `expo-env.d.ts` e `.expo/types/` — nascem do `npx expo start` e estão
+no `.gitignore`. Em árvore recém-clonada, antes disso, o `tsc` acusa erros que
+não existem: rota inexistente nos `router.push`, e `TS2882` no import de
+`src/global.css` (a declaração de módulo `*.css` vem do `expo/types`, alcançado
+só pelo `expo-env.d.ts`).
+
+## Estrutura
+
+| Caminho | O que tem |
+|---|---|
+| `src/app/` | Rotas, e só rotas — layout e telas do expo-router |
+| `src/lib/` | Conversa com o Supabase: auth, turmas, notas, sorteio |
+| `src/components/` | Componentes de interface reaproveitados entre telas |
+| `src/contexts/` | Sessão de autenticação e tema |
+| `src/hooks/` | Hooks de tema e esquema de cores |
+| `src/constants/` | Paleta, espaçamentos e tipografia |
+| `scripts/` | Geração de ícones, leitura e escrita de PNG, checagem de contraste |
+| `supabase/migrations/` | O esquema, a RLS e as funções — aplicadas à mão |
+| `supabase/testes/` | Popular e limpar jogadores de teste |
+| `docs/decisoes.md` | Stack, decisões fechadas, fases e armadilhas |
+
+Rotas ficam em `src/app`; todo o resto do código, em `src/`.
+
 ## Convenções
 
 Em [AGENTS.md](AGENTS.md).

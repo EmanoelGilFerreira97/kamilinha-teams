@@ -12,11 +12,19 @@ if (!url || !anonKey) {
   );
 }
 
+// O pre-render do Expo Router (web com output "static") roda este modulo no
+// Node, onde nao existe `window` -- e o AsyncStorage da web e o localStorage.
+// Sem esta guarda o SupabaseAuthClient lanca "window is not defined" ao
+// inicializar, e como isso acontece fora de qualquer try o processo inteiro cai.
+const noServidor = typeof window === 'undefined';
+
 export const supabase = createClient(url, anonKey, {
   auth: {
-    storage: AsyncStorage,
-    autoRefreshToken: true,
-    persistSession: true,
+    // Nada de storage no servidor: nao ha sessao para guardar num render que
+    // termina em HTML, e sem storage o cliente nao tenta ler o localStorage.
+    storage: noServidor ? undefined : AsyncStorage,
+    autoRefreshToken: !noServidor,
+    persistSession: !noServidor,
     // Nao ha URL de navegador para inspecionar em app nativo.
     detectSessionInUrl: false,
     flowType: 'pkce',
@@ -25,10 +33,12 @@ export const supabase = createClient(url, anonKey, {
 
 // O refresh automatico so deve rodar com o app em primeiro plano: em segundo
 // plano ele gastaria bateria e rede tentando renovar um token que ninguem usa.
-AppState.addEventListener('change', (estado) => {
-  if (estado === 'active') {
-    supabase.auth.startAutoRefresh();
-  } else {
-    supabase.auth.stopAutoRefresh();
-  }
-});
+if (!noServidor) {
+  AppState.addEventListener('change', (estado) => {
+    if (estado === 'active') {
+      supabase.auth.startAutoRefresh();
+    } else {
+      supabase.auth.stopAutoRefresh();
+    }
+  });
+}
