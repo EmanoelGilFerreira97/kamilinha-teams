@@ -8,14 +8,20 @@
 -- ANTES DE RODAR
 -- ---------------------------------------------------------------------------
 --
--- 1. No painel, em Authentication > Users > Add user, crie os seis e-mails
+-- 1. No painel, em Authentication > Users > Add user, crie os onze e-mails
 --    abaixo (senha qualquer; estas contas nunca fazem login). Criar por ali e
 --    nao por SQL de proposito: as colunas obrigatorias de `auth.users` mudam
 --    entre versoes do GoTrue, e a API do painel nao quebra com isso.
 --
---      ana@teste.kamilinha      diego@teste.kamilinha
---      bruno@teste.kamilinha    elisa@teste.kamilinha
---      carla@teste.kamilinha    fabio@teste.kamilinha
+--      ana@teste.kamilinha      fabio@teste.kamilinha     joao@teste.kamilinha
+--      bruno@teste.kamilinha    gabi@teste.kamilinha      lucas@teste.kamilinha
+--      carla@teste.kamilinha    heitor@teste.kamilinha
+--      diego@teste.kamilinha    ines@teste.kamilinha
+--      elisa@teste.kamilinha
+--
+--    Os onze existem para dar 12 jogadores com voce, que sao tres quartetos.
+--    Criar menos funciona: o script so alcanca quem existe. Com k semeados,
+--    cada um recebe k-1 votos, e a media bayesiana sai (250 + (k-1)*v)/(4+k).
 --
 --    O gatilho `ao_criar_usuario` cria o perfil de cada um sozinho.
 --
@@ -29,12 +35,17 @@
 update public.perfis p
 set nome = dados.nome
 from (values
-  ('ana@teste.kamilinha',   'Ana Teste'),
-  ('bruno@teste.kamilinha', 'Bruno Teste'),
-  ('carla@teste.kamilinha', 'Carla Teste'),
-  ('diego@teste.kamilinha', 'Diego Teste'),
-  ('elisa@teste.kamilinha', 'Elisa Teste'),
-  ('fabio@teste.kamilinha', 'Fabio Teste')
+  ('ana@teste.kamilinha',    'Ana Teste'),
+  ('bruno@teste.kamilinha',  'Bruno Teste'),
+  ('carla@teste.kamilinha',  'Carla Teste'),
+  ('diego@teste.kamilinha',  'Diego Teste'),
+  ('elisa@teste.kamilinha',  'Elisa Teste'),
+  ('fabio@teste.kamilinha',  'Fabio Teste'),
+  ('gabi@teste.kamilinha',   'Gabi Teste'),
+  ('heitor@teste.kamilinha', 'Heitor Teste'),
+  ('ines@teste.kamilinha',   'Ines Teste'),
+  ('joao@teste.kamilinha',   'Joao Teste'),
+  ('lucas@teste.kamilinha',  'Lucas Teste')
 ) as dados(email, nome)
 join auth.users u on u.email = dados.email
 where p.id = u.id;
@@ -56,12 +67,17 @@ insert into public.notas (grupo_id, avaliador_id, avaliado_id, ataque, defesa, l
 select g.id, avaliador.id, avaliado.id, alvo.ataque, alvo.defesa, alvo.levantada
 from public.grupos g
 cross join (values
-  ('ana@teste.kamilinha',   90, 80, 70),
-  ('bruno@teste.kamilinha', 80, 70, 60),
-  ('carla@teste.kamilinha', 70, 60, 50),
-  ('diego@teste.kamilinha', 60, 50, 40),
-  ('elisa@teste.kamilinha', 50, 40, 30),
-  ('fabio@teste.kamilinha', 40, 30, 20)
+  ('ana@teste.kamilinha',    90, 80, 70),
+  ('gabi@teste.kamilinha',   85, 75, 65),
+  ('bruno@teste.kamilinha',  80, 70, 60),
+  ('heitor@teste.kamilinha', 75, 65, 55),
+  ('carla@teste.kamilinha',  70, 60, 50),
+  ('ines@teste.kamilinha',   65, 55, 45),
+  ('diego@teste.kamilinha',  60, 50, 40),
+  ('joao@teste.kamilinha',   55, 45, 35),
+  ('elisa@teste.kamilinha',  50, 40, 30),
+  ('lucas@teste.kamilinha',  45, 35, 25),
+  ('fabio@teste.kamilinha',  40, 30, 20)
 ) as alvo(email, ataque, defesa, levantada)
 join auth.users avaliado on avaliado.email = alvo.email
 join auth.users avaliador

@@ -35,6 +35,29 @@ O código já sai pronto para os dois.
   que garante que toda escrita atravesse uma regra escrita uma vez só.
 - **Migrações versionadas em `supabase/migrations/`, aplicadas à mão** no SQL
   Editor do painel: não há Supabase CLI no ambiente. Ver `supabase/README.md`.
+- **O sorteio roda no banco, não no aparelho.** O documento previa o contrário,
+  mas `notas_da_turma()` não devolve a nota de quem pergunta, e o snake draft
+  precisa dela para escalar essa pessoa. `sortear_times()` usa o overall de todo
+  mundo e devolve só a composição dos times. O "custo de servidor" que a
+  previsão original queria evitar não se materializa: é uma função, não um
+  processo.
+- **A fórmula bayesiana vive em `overall_do_grupo()`,** que não filtra quem
+  pergunta e por isso **não tem grant para ninguém**. É a única função do
+  sistema que devolveria a própria nota. Quem a chama são `notas_da_turma()` e
+  `sortear_times()`, que rodam como donas do banco. Conceder `execute` nela a
+  `authenticated` entrega a nota de cada um para o próprio.
+- **Quartetos, e o último time joga curto.** São `ceil(n/4)` times: os primeiros
+  levam quatro e o último leva o que sobrar. Com n ≡ 1 (mod 4) — 5, 9, 13 — o
+  último fica com uma pessoa só, e a tela avisa antes de sortear em vez de
+  produzir isso calado.
+- **O sorteio revela o seu rank por aproximação.** O draft ordena por overall, e
+  você já enxerga o overall dos outros — dá para simular o sorteio com o seu
+  valor como incógnita e cercar onde caiu. Não fere o anonimato dos avaliadores,
+  que é a regra dura; fere por aproximação a regra branda de não ver a própria
+  nota. Mitigado listando cada time em ordem alfabética, nunca de escolha, e não
+  devolvendo nota nem soma de time — soma de time com três companheiros
+  conhecidos resolveria o seu número exatamente. Limite aceito, como o do
+  conluio.
 - **Texto que a pessoa lê leva acento; identificador e comentário, não.** Isso
   inclui as mensagens de `raise exception` das funções: elas sobem pelo
   PostgREST e o cliente mostra `error.message` como está, então são copy de
@@ -110,8 +133,10 @@ anonimato. O objetivo é inviabilizar a desanonimização casual.
   notas bateu com a fórmula, e a correção de nota sobreviveu à reabertura. De
   fora, com a anon key: leitura, contagem por agregado, escrita direta e as
   quatro funções, todas barradas.
-- **04 — Sorteio.** Snake draft pelo overall, embaralhando empates para os times
-  variarem a cada rodada. Roda no aparelho, sem custo de servidor.
+- **04 — Sorteio.** Concluída. Snake draft pelo overall rodando no banco, com
+  quem veio hoje escolhido na tela, embaralhando empates para os times variarem
+  a cada rodada. Testado no APK. De fora, com a anon key, as seis funções
+  barradas; e o ACL de `overall_do_grupo` conferido sem `authenticated`.
 - **05 — Acabamento e publicação.**
 
 ## Armadilhas já encontradas

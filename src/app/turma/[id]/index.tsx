@@ -154,6 +154,10 @@ export default function DetalheDaTurma() {
                 {turma.codigo}
               </Text>
               <Botao titulo="Convidar" variante="secundario" aoTocar={() => void aoConvidar()} />
+              <Botao
+                titulo="Sortear times"
+                aoTocar={() => router.push({ pathname: '/turma/[id]/sortear', params: { id } })}
+              />
               <Text style={estilos.tituloDaSecao}>Na quadra ({linhas.length})</Text>
               <Text style={estilos.explicacao}>
                 Toque em alguém para avaliar. A nota só aparece depois de cinco avaliadores, e
