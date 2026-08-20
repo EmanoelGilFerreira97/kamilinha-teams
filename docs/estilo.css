@@ -1,0 +1,103 @@
+/* A mesma paleta do app: rosa da chama do logo, vinho no tema escuro. Os nomes
+   sao por papel e nao por cor, como em src/constants/theme.ts. */
+:root {
+  --fundo: #ffffff;
+  --superficie: #fdeef3;
+  --texto: #1a1013;
+  --texto-fraco: #7a5a66;
+  --destaque-forte: #cf2960;
+  --borda: #a78893;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fundo: #2b0d18;
+    --superficie: #43172a;
+    --texto: #f7f0f3;
+    --texto-fraco: #d89ab2;
+    --destaque-forte: #e0648d;
+    --borda: #805e69;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.6;
+  margin: 0 auto;
+  max-width: 44rem;
+  padding: 2.5rem 1.25rem 4rem;
+}
+
+h1 {
+  font-size: 1.9rem;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin: 0 0 0.25rem;
+}
+
+h2 {
+  border-top: 1px solid var(--borda);
+  font-size: 1.15rem;
+  margin: 2.5rem 0 0.75rem;
+  padding-top: 1.5rem;
+}
+
+h3 {
+  font-size: 1rem;
+  margin: 1.5rem 0 0.5rem;
+}
+
+p,
+li {
+  color: var(--texto);
+}
+
+a {
+  color: var(--destaque-forte);
+}
+
+.data {
+  color: var(--texto-fraco);
+  font-size: 0.9rem;
+  margin: 0 0 2rem;
+}
+
+.destaque {
+  background: var(--superficie);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+}
+
+.destaque p:first-child {
+  margin-top: 0;
+}
+
+.destaque p:last-child {
+  margin-bottom: 0;
+}
+
+footer {
+  border-top: 1px solid var(--borda);
+  color: var(--texto-fraco);
+  font-size: 0.9rem;
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+}
+
+footer a {
+  color: var(--texto-fraco);
+}
+
+ul {
+  padding-left: 1.25rem;
+}
+
+li {
+  margin-bottom: 0.4rem;
+}

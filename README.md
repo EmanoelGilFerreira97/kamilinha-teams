@@ -68,12 +68,37 @@ dependência externa — PNG é um formato simples e o Node já traz o `zlib`. V
 [scripts/gerar-icones.js](scripts/gerar-icones.js).
 
 ```bash
+npm run artes
+```
+
+Gera as duas peças que a ficha da Play exige — o ícone de 512×512 e o gráfico de
+destaque de 1024×500 — em `assets/loja/`, que fica fora do bundle do app. Mesmo
+encoder, mesmo recorte do logo.
+
+```bash
 npm run contraste
 ```
 
-Confere a raz�o de contraste da WCAG entre os pares de cor que as telas usam,
+Confere a razão de contraste da WCAG entre os pares de cor que as telas usam,
 nos dois temas. Rodar depois de mexer na paleta: contraste ruim compila limpo
-e s� aparece na tela.
+e só aparece na tela.
+
+## Loja
+
+A ficha da Play, o formulário de Data Safety e o que mais o console pergunta
+estão respondidos em [docs/play-store.md](docs/play-store.md), com os textos
+prontos para copiar.
+
+As páginas públicas que a Play exige — política de privacidade e instruções de
+exclusão de conta — são HTML estático em `docs/`, servido pelo GitHub Pages a
+partir da `main`:
+
+- <https://emanoelgilferreira97.github.io/kamilinha-teams/>
+- <https://emanoelgilferreira97.github.io/kamilinha-teams/privacidade.html>
+- <https://emanoelgilferreira97.github.io/kamilinha-teams/excluir-conta.html>
+
+**O que essas páginas dizem tem de continuar batendo com o que o código faz.**
+Mudou o que o app guarda, mudam as três — e muda o Data Safety junto.
 
 ## Banco
 
@@ -120,10 +145,13 @@ só pelo `expo-env.d.ts`).
 | `src/contexts/` | Sessão de autenticação e tema |
 | `src/hooks/` | Hooks de tema e esquema de cores |
 | `src/constants/` | Paleta, espaçamentos e tipografia |
-| `scripts/` | Geração de ícones, leitura e escrita de PNG, checagem de contraste |
+| `scripts/` | Geração de ícones e artes de loja, leitura e escrita de PNG, checagem de contraste |
+| `assets/loja/` | Ícone e gráfico de destaque da ficha da Play — fora do bundle |
 | `supabase/migrations/` | O esquema, a RLS e as funções — aplicadas à mão |
 | `supabase/testes/` | Popular e limpar jogadores de teste |
 | `docs/decisoes.md` | Stack, decisões fechadas, fases e armadilhas |
+| `docs/play-store.md` | Respostas do Play Console e textos da ficha |
+| `docs/*.html` | Páginas públicas do GitHub Pages: privacidade e exclusão de conta |
 
 Rotas ficam em `src/app`; todo o resto do código, em `src/`.
 

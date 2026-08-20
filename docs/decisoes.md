@@ -73,6 +73,30 @@ O código já sai pronto para os dois.
   mudar assinatura existente, e parâmetro novo sempre com valor padrão — senão o
   celular que não atualizou quebra, e quebra em silêncio.
 
+- **A exclusão de conta apaga direto em `auth.users`.** `excluir_conta()` roda
+  `security definer`, e o dono dela — `postgres` — alcança a tabela do schema
+  `auth`, que pertence ao `supabase_auth_admin`. Conferido com
+  `has_table_privilege('postgres', 'auth.users', 'delete')`. Não é garantia do
+  Supabase, é permissão que este projeto tem: se um dia mudar, o caminho vira
+  Edge Function com a service_role, e só a última linha da função se move.
+- **A transferência de posse acontece dentro da mesma função**, turma por turma,
+  antes do delete. O herdeiro é o membro mais antigo, com desempate por
+  `usuario_id` para não depender da ordem que o planejador escolher no dia.
+- **As páginas públicas vivem em `docs/` na `main`, servidas pelo GitHub Pages.**
+  A Play exige política de privacidade em URL que abra e permaneça. O
+  repositório já é público, então isso não custa serviço novo nem conta nova, e
+  a página versiona junto com o código que ela descreve. Um `.nojekyll` ao lado
+  serve o HTML como está, sem o Jekyll no caminho.
+- **O Data Safety declara "Fotos" mesmo com o avatar não aparecendo em tela.** O
+  app guarda `perfis.avatar_url`, vindo do Google, e não o exibe em lugar
+  nenhum hoje. Declarar dado guardado e não usado é chato; sub-declarar é o que
+  derruba a ficha. O dia em que se decidir que a foto não vale a pena, sai a
+  coluna e sai a linha do formulário.
+- **O e-mail de contato do app é o pessoal**, `emanoelf54@gmail.com`. A Play
+  exige e-mail visível na ficha, e a política de privacidade precisa de um
+  canal. Fica registrado como escolha, e não como descuido: separar numa caixa
+  só do app é troca barata, se um dia incomodar.
+
 - **A paleta sai do logo do grupo**, e vem em dois temas que a pessoa escolhe:
   claro (fundo branco, rosa de destaque) e escuro (fundo vinho, rosa claro). O
   padrão segue o aparelho, e a escolha manual sobrevive ao fechar o app, em
