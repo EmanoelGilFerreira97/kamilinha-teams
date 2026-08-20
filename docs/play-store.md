@@ -94,6 +94,12 @@ O projeto é de código aberto: github.com/EmanoelGilFerreira97/kamilinha-teams
 | Site | https://emanoelgilferreira97.github.io/kamilinha-teams/ |
 | Política de privacidade | https://emanoelgilferreira97.github.io/kamilinha-teams/privacidade.html |
 
+**As duas URLs acima só respondem depois que a fase 06 for mesclada na `main`.**
+O GitHub Pages serve da `main`, pasta `/docs`, e as páginas nascem na branch da
+fase. A ordem escolhida foi mesclar primeiro e preencher a ficha depois — o
+gargalo de verdade é a verificação da conta de desenvolvedor, então a URL não
+faz falta antes disso.
+
 ### Artes obrigatórias
 
 | Peça | Formato | Situação |
@@ -232,7 +238,8 @@ ligada ao app já existente.
 ## Ordem de execução
 
 1. [ ] Abrir e verificar a conta de desenvolvedor *(mais lento — começar já)*
-2. [ ] Ligar o GitHub Pages e conferir que as três páginas abrem
+2. [ ] Mesclar a fase na `main`, ligar o GitHub Pages (Settings → Pages →
+   `main`, pasta `/docs`) e conferir que as três páginas abrem
 3. [ ] Tirar as capturas de tela e fazer o gráfico de destaque
 4. [ ] Criar o app no console e preencher a ficha
 5. [ ] Data Safety, classificação de conteúdo e público-alvo
