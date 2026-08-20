@@ -107,3 +107,14 @@ export async function sairDaTurma(grupoId: string): Promise<void> {
   const { error } = await supabase.rpc('sair_da_turma', { p_grupo: grupoId });
   if (error) throw error;
 }
+
+/**
+ * Exclui a turma. So o dono consegue, e a recusa vem do banco.
+ *
+ * Pelo mesmo motivo de sairDaTurma: um delete barrado por policy apagaria zero
+ * linhas em silencio, e a tela diria que excluiu.
+ */
+export async function excluirTurma(grupoId: string): Promise<void> {
+  const { error } = await supabase.rpc('excluir_turma', { p_grupo: grupoId });
+  if (error) throw error;
+}

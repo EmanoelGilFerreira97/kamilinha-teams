@@ -19,6 +19,7 @@ import { mensagemDeErro } from '@/lib/erros';
 import { listarNotasDaTurma, type NotaDaTurma } from '@/lib/notas';
 import {
   buscarTurma,
+  excluirTurma,
   listarMembros,
   sairDaTurma,
   type MembroDaTurma,
@@ -46,7 +47,9 @@ export default function DetalheDaTurma() {
   const [linhas, setLinhas] = useState<LinhaDaQuadra[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
-  const [saindo, setSaindo] = useState(false);
+  // Serve as duas saidas da turma: sair, para quem e membro, e excluir, para
+  // quem e dono. Nunca ha as duas na tela ao mesmo tempo.
+  const [encerrando, setEncerrando] = useState(false);
 
   const meuId = sessao?.user.id;
   const souDono = turma !== null && turma.dono_id === meuId;
@@ -119,13 +122,37 @@ export default function DetalheDaTurma() {
   }
 
   async function confirmarSaida() {
-    setSaindo(true);
+    setEncerrando(true);
     try {
       await sairDaTurma(id);
       router.replace('/');
     } catch (e) {
       Alert.alert('Sair da turma', mensagemDeErro(e, 'Não foi possível sair da turma.'));
-      setSaindo(false);
+      setEncerrando(false);
+    }
+  }
+
+  function aoPedirParaExcluir() {
+    if (turma === null) return;
+    Alert.alert(
+      'Excluir turma',
+      `A turma ${turma.nome} some para todo mundo, com as notas dadas nela. ` +
+        'Não dá para desfazer.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Excluir', style: 'destructive', onPress: () => void confirmarExclusao() },
+      ]
+    );
+  }
+
+  async function confirmarExclusao() {
+    setEncerrando(true);
+    try {
+      await excluirTurma(id);
+      router.replace('/');
+    } catch (e) {
+      Alert.alert('Excluir turma', mensagemDeErro(e, 'Não foi possível excluir a turma.'));
+      setEncerrando(false);
     }
   }
 
@@ -193,15 +220,15 @@ export default function DetalheDaTurma() {
           )}
         />
 
-        {souDono ? null : (
-          <Botao
-            titulo="Sair da turma"
-            variante="secundario"
-            aoTocar={aoPedirParaSair}
-            carregando={saindo}
-            estilo={estilos.botaoSair}
-          />
-        )}
+        {/* O dono nao sai da turma -- ela ficaria sem quem responde por ela.
+            O que ele tem no lugar e o encerramento dela. */}
+        <Botao
+          titulo={souDono ? 'Excluir turma' : 'Sair da turma'}
+          variante="secundario"
+          aoTocar={souDono ? aoPedirParaExcluir : aoPedirParaSair}
+          carregando={encerrando}
+          estilo={estilos.botaoSair}
+        />
       </View>
     </>
   );

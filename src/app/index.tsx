@@ -128,6 +128,16 @@ export default function MinhasTurmas() {
           variante="secundario"
           aoTocar={() => router.push('/entrar-turma')}
         />
+        {/* A Play exige que a exclusao de conta esteja no app, e que se chegue
+            nela sem procurar. Fica aqui embaixo, e nao no topo, porque e destino
+            raro ao lado das duas acoes do dia a dia. */}
+        <Pressable
+          accessibilityRole="button"
+          hitSlop={Spacing.two}
+          onPress={() => router.push('/conta')}
+          style={({ pressed }) => pressed && estilos.pressionado}>
+          <Text style={estilos.conta}>Minha conta</Text>
+        </Pressable>
       </View>
     </SafeAreaView>
   );
@@ -229,6 +239,13 @@ function criarEstilos(cores: Cores) {
       gap: Spacing.two,
       paddingBottom: Spacing.four,
       paddingTop: Spacing.three,
+    },
+    conta: {
+      color: cores.textoFraco,
+      fontSize: 14,
+      fontWeight: '600',
+      paddingTop: Spacing.two,
+      textAlign: 'center',
     },
   });
 }

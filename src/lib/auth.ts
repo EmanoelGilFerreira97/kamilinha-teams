@@ -68,3 +68,18 @@ export async function sair(): Promise<void> {
   const { error } = await supabase.auth.signOut();
   if (error) throw error;
 }
+
+/**
+ * Exclui a conta e tudo que ela deixou para tras.
+ *
+ * O signOut vem depois e e `local` de proposito: o usuario ja nao existe no
+ * servidor, entao o signOut global responderia 403 e deixaria a sessao morta
+ * gravada no aparelho. Local apaga o que esta no AsyncStorage e avisa o
+ * onAuthStateChange, que e quem leva a pessoa de volta ao login.
+ */
+export async function excluirConta(): Promise<void> {
+  const { error } = await supabase.rpc('excluir_conta');
+  if (error) throw error;
+
+  await supabase.auth.signOut({ scope: 'local' });
+}
