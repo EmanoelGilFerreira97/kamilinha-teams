@@ -104,9 +104,12 @@ faz falta antes disso.
 
 | Peça | Formato | Situação |
 |---|---|---|
-| Ícone | PNG 512×512, 32 bits, sem transparência | Gerar a partir de `assets/logo.png` — o mesmo recorte de `scripts/gerar-icones.js` |
-| Gráfico de destaque | PNG ou JPG 1024×500 | **Falta fazer** |
+| Ícone | PNG 512×512, 32 bits, sem transparência | Pronto: `assets/loja/icone-512.png` |
+| Gráfico de destaque | PNG ou JPG 1024×500 | Pronto: `assets/loja/destaque-1024x500.png` |
 | Capturas de tela do celular | mínimo 2, ideal 4 a 8; entre 320 px e 3840 px de lado | **Faltam** — tirar do aparelho com o app em uso |
+
+As duas primeiras saem de `npm run artes`, a partir de `assets/logo.png`. Se o
+logo mudar, rodar de novo em vez de editar PNG à mão.
 
 As capturas que valem a pena: lista de turmas, tela da turma com as notas, tela
 de avaliar alguém e o resultado do sorteio. Vale tirar as quatro no tema claro,
@@ -240,7 +243,8 @@ ligada ao app já existente.
 1. [ ] Abrir e verificar a conta de desenvolvedor *(mais lento — começar já)*
 2. [ ] Mesclar a fase na `main`, ligar o GitHub Pages (Settings → Pages →
    `main`, pasta `/docs`) e conferir que as três páginas abrem
-3. [ ] Tirar as capturas de tela e fazer o gráfico de destaque
+3. [ ] Tirar as capturas de tela *(o ícone e o gráfico de destaque já estão em
+   `assets/loja/`)*
 4. [ ] Criar o app no console e preencher a ficha
 5. [ ] Data Safety, classificação de conteúdo e público-alvo
 6. [ ] Criar a turma de demonstração e preencher "Acesso ao app"
